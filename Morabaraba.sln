@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Morabaraba", "Morabaraba\Morabaraba.fsproj", "{AC51A8DB-8511-4080-861F-0339539C15A5}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Morabaraba.Tests", "Morabaraba.Tests\Morabaraba.Tests.fsproj", "{64C44995-6824-4806-AF26-7F9FD23DCBC3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC51A8DB-8511-4080-861F-0339539C15A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC51A8DB-8511-4080-861F-0339539C15A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC51A8DB-8511-4080-861F-0339539C15A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC51A8DB-8511-4080-861F-0339539C15A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64C44995-6824-4806-AF26-7F9FD23DCBC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64C44995-6824-4806-AF26-7F9FD23DCBC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64C44995-6824-4806-AF26-7F9FD23DCBC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64C44995-6824-4806-AF26-7F9FD23DCBC3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
