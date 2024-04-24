@@ -1,0 +1,17 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Linting"
+dotnet fsharplint lint ./*sln
+
+echo "Formatting"
+dotnet fantomas ./*/*.fs
+git add .
+
+echo "Building"
+dotnet build
+
+echo "Testing"
+dotnet test
+
+echo "Linting, formatting, building, testing and committing successful"

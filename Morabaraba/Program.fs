@@ -1,2 +1,22 @@
-﻿// For more information see https://aka.ms/fsharp-console-apps
-printfn "Hello from F#"
+﻿type Shade =
+    | Dark
+    | Light
+
+type Junction = Junction of string
+
+type Competitor = { Shade: Shade; Hand: int }
+
+type Board =
+    { Player: Competitor
+      Opponent: Competitor
+      Occupants: Map<Junction, Shade> }
+
+type Action =
+    { Source: option<Junction>
+      Destination: Junction }
+
+type Game = { Board: Board; History: list<Action> }
+
+type Executor =
+    | Executor of (Game -> Action -> option<Game>) * child: Executor * failed: Executor
+    | NoExecutor
