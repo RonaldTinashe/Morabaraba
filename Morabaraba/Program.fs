@@ -46,6 +46,10 @@ let initialGame =
     { History = []; Board = board }
 
 let executor =
+    let checkPlacingHand game _ =
+        let player = game.Board.Player
+        if player.Hand > 0 then Some game else None
+
     let placement game action =
         let board = game.Board
         let updatedOccupants = Map.add action.Destination board.Player.Shade board.Occupants
@@ -82,10 +86,14 @@ let executor =
         Some { game with Board = updatedBoard }
 
     BinaryTree.Node(
-        placement,
+        checkPlacingHand,
         BinaryTree.Node(
-            switchTurns,
-            BinaryTree.Node(decreaseHand, BinaryTree.NoValue, BinaryTree.NoValue),
+            placement,
+            BinaryTree.Node(
+                switchTurns,
+                BinaryTree.Node(decreaseHand, BinaryTree.NoValue, BinaryTree.NoValue),
+                BinaryTree.NoValue
+            ),
             BinaryTree.NoValue
         ),
         BinaryTree.NoValue

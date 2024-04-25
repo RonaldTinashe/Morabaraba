@@ -51,3 +51,21 @@ let ``Initial dark competitor should have 11 cows after occupying A1`` () =
 
     let game = execute initialGame action |> Option.get
     Assert.Equal(11, game.Board.Opponent.Hand)
+
+[<Fact>]
+let ``Light player cannot place with an empty hand`` () =
+    let action =
+        { Source = None
+          Destination = Junction "A1" }
+
+    let player = { Shade = Light; Hand = 0 }
+    let occupants = List.init 5 (fun i -> Junction $"E{i}", Light) |> Map
+
+    let game =
+        { Board =
+            { Occupants = occupants
+              Player = player
+              Opponent = { player with Shade = Dark } }
+          History = [] }
+
+    Assert.Equal(None, execute game action)
