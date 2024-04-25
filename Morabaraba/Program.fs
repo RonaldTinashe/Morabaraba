@@ -101,8 +101,8 @@ let executor =
     |> Executor
 
 let execute game action =
-    let executionFolder gameOption executionValue =
-        Option.bind (fun gameValue -> executionValue gameValue action) gameOption
+    let executionFolder gameOption ruleExecution =
+        Option.bind (fun gameValue -> ruleExecution gameValue action) gameOption
 
     match executor with
     | Executor e -> BinaryTree.fold executionFolder (Some game) e
