@@ -75,8 +75,8 @@ let executor =
 let execute game action =
     let rec innerExecute executor game action =
         match executor with
-        | (Executor(placement, child, _)) ->
-            let placedGame = placement game action
+        | (Executor(executorValue, child, _)) ->
+            let placedGame = executorValue game action
 
             match child with
             | NoExecutor -> placedGame
