@@ -50,7 +50,7 @@ let executor =
         let player = game.Board.Player
         if player.Hand > 0 then Some game else None
 
-    let placement game action =
+    let place game action =
         let board = game.Board
         let updatedOccupants = Map.add action.Destination board.Player.Shade board.Occupants
 
@@ -88,7 +88,7 @@ let executor =
     BinaryTree.Node(
         checkPlacingHand,
         BinaryTree.Node(
-            placement,
+            place,
             BinaryTree.Node(
                 switchTurns,
                 BinaryTree.Node(decreaseHand, BinaryTree.NoValue, BinaryTree.NoValue),
