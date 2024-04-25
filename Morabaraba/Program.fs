@@ -1,5 +1,18 @@
 ﻿module Morabaraba
 
+[<RequireQualifiedAccess>]
+module BinaryTree =
+    type Node<'T> =
+        | Node of value: 'T * left: Node<'T> * right: Node<'T>
+        | NoValue
+
+    let rec fold folder state tree =
+        match tree with
+        | NoValue -> state
+        | Node(value, left, _) ->
+            let state = folder state value
+            fold folder state left
+
 type Shade =
     | Dark
     | Light
@@ -19,9 +32,7 @@ type Action =
 
 type Game = { Board: Board; History: list<Action> }
 
-type Executor =
-    | Executor of (Game -> Action -> option<Game>) * child: Executor * failed: Executor
-    | NoExecutor
+type Executor = Executor of BinaryTree.Node<Game -> Action -> option<Game>>
 
 let initialGame =
     let player = { Shade = Dark; Hand = 12 }
@@ -70,20 +81,23 @@ let executor =
 
         Some { game with Board = updatedBoard }
 
-    Executor(placement, Executor(switchTurns, Executor(decreaseHand, NoExecutor, NoExecutor), NoExecutor), NoExecutor)
+    BinaryTree.Node(
+        placement,
+        BinaryTree.Node(
+            switchTurns,
+            BinaryTree.Node(decreaseHand, BinaryTree.NoValue, BinaryTree.NoValue),
+            BinaryTree.NoValue
+        ),
+        BinaryTree.NoValue
+    )
+    |> Executor
 
 let execute game action =
-    let rec innerExecute executor game action =
-        match executor with
-        | (Executor(executorValue, child, _)) ->
-            let placedGame = executorValue game action
+    let executionFolder gameOption executionValue =
+        Option.bind (fun gameValue -> executionValue gameValue action) gameOption
 
-            match child with
-            | NoExecutor -> placedGame
-            | _ -> Option.bind (fun game -> innerExecute child game action) placedGame
-        | NoExecutor -> None
-
-    innerExecute executor game action
+    match executor with
+    | Executor e -> BinaryTree.fold executionFolder (Some game) e
 
 [<EntryPoint>]
 let main _ = 0
