@@ -6,9 +6,10 @@ open Morabaraba
 
 [<Fact>]
 let ``Initial player's shade is Dark`` () =
-    let initialBoard = initialGame.Board
+    let player = initialGame.Board.Player
+    Assert.Equal(Dark, player.Shade)
 
-    let playerShadeIsDark =
-        initialBoard.Player.Shade = Dark && initialBoard.Opponent.Shade = Light
-
-    Assert.True(playerShadeIsDark)
+[<Fact>]
+let ``Initial opponent's shade is Light`` () =
+    let opponent = initialGame.Board.Opponent
+    Assert.Equal(Light, opponent.Shade)
