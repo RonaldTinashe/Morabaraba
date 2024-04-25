@@ -1,4 +1,6 @@
-﻿type Shade =
+﻿module Morabaraba
+
+type Shade =
     | Dark
     | Light
 
@@ -20,3 +22,17 @@ type Game = { Board: Board; History: list<Action> }
 type Executor =
     | Executor of (Game -> Action -> option<Game>) * child: Executor * failed: Executor
     | NoExecutor
+
+let initialGame =
+    let player = { Shade = Dark; Hand = 0 }
+    let opponent = { player with Shade = Light }
+
+    let board =
+        { Player = player
+          Opponent = opponent
+          Occupants = Map.empty }
+
+    { History = []; Board = board }
+
+[<EntryPoint>]
+let main _ = 0

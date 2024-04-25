@@ -1,7 +1,14 @@
-module Tests
+module Morabaraba.Tests
 
 open System
 open Xunit
+open Morabaraba
 
 [<Fact>]
-let ``My test`` () = Assert.True(true)
+let ``Initial player's shade is Dark`` () =
+    let initialBoard = initialGame.Board
+
+    let playerShadeIsDark =
+        initialBoard.Player.Shade = Dark && initialBoard.Opponent.Shade = Light
+
+    Assert.True(playerShadeIsDark)
