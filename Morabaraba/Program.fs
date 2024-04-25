@@ -50,6 +50,14 @@ let executor =
         let player = game.Board.Player
         if player.Hand > 0 then Some game else None
 
+    let checkPlacingDestination game action =
+        let occupants = game.Board.Occupants
+
+        if Map.containsKey action.Destination occupants then
+            None
+        else
+            Some game
+
     let place game action =
         let board = game.Board
         let updatedOccupants = Map.add action.Destination board.Player.Shade board.Occupants
@@ -88,10 +96,14 @@ let executor =
     BinaryTree.Node(
         checkPlacingHand,
         BinaryTree.Node(
-            place,
+            checkPlacingDestination,
             BinaryTree.Node(
-                switchTurns,
-                BinaryTree.Node(decreaseHand, BinaryTree.NoValue, BinaryTree.NoValue),
+                place,
+                BinaryTree.Node(
+                    switchTurns,
+                    BinaryTree.Node(decreaseHand, BinaryTree.NoValue, BinaryTree.NoValue),
+                    BinaryTree.NoValue
+                ),
                 BinaryTree.NoValue
             ),
             BinaryTree.NoValue

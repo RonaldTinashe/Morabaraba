@@ -69,3 +69,21 @@ let ``Light player cannot place with an empty hand`` () =
           History = [] }
 
     Assert.Equal(None, execute game action)
+
+[<Fact>]
+let ``Light player cannot place on E1 if E1 is occupied`` () =
+    let action =
+        { Source = None
+          Destination = Junction "E1" }
+
+    let player = { Shade = Light; Hand = 7 }
+    let occupants = List.init 5 (fun i -> Junction $"E{i}", Dark) |> Map
+
+    let game =
+        { Board =
+            { Occupants = occupants
+              Player = player
+              Opponent = { player with Shade = Dark } }
+          History = [] }
+
+    Assert.Equal(None, execute game action)
