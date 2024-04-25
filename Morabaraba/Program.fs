@@ -34,15 +34,24 @@ let initialGame =
 
     { History = []; Board = board }
 
+let executor =
+    let placement game action =
+        let board = game.Board
+        let updatedOccupants = Map.add action.Destination board.Player.Shade board.Occupants
+
+        let updatedBoard =
+            { board with
+                Occupants = updatedOccupants }
+
+        Some { game with Board = updatedBoard }
+
+    Executor(placement, NoExecutor, NoExecutor)
+
 let execute game action =
-    let board = game.Board
-    let updatedOccupants = Map.add action.Destination board.Player.Shade board.Occupants
+    match executor with
+    | (Executor(placement, _, _)) -> placement game action
+    | NoExecutor -> None
 
-    let updatedBoard =
-        { board with
-            Occupants = updatedOccupants }
-
-    Some { game with Board = updatedBoard }
 
 [<EntryPoint>]
 let main _ = 0
