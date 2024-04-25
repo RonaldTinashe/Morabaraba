@@ -93,6 +93,11 @@ let executor =
 
         Some { game with Board = updatedBoard }
 
+    let saveAction game action =
+        Some
+            { game with
+                History = action :: game.History }
+
     BinaryTree.Node(
         checkPlacingHand,
         BinaryTree.Node(
@@ -101,7 +106,11 @@ let executor =
                 place,
                 BinaryTree.Node(
                     switchTurns,
-                    BinaryTree.Node(decreaseHand, BinaryTree.NoValue, BinaryTree.NoValue),
+                    BinaryTree.Node(
+                        decreaseHand,
+                        BinaryTree.Node(saveAction, BinaryTree.NoValue, BinaryTree.NoValue),
+                        BinaryTree.NoValue
+                    ),
                     BinaryTree.NoValue
                 ),
                 BinaryTree.NoValue

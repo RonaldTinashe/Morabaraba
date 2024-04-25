@@ -87,3 +87,12 @@ let ``Light player cannot place on E1 if E1 is occupied`` () =
           History = [] }
 
     Assert.Equal(None, execute game action)
+
+[<Fact>]
+let ``Save action after first action is executed`` () =
+    let action =
+        { Source = None
+          Destination = Junction "A1" }
+
+    let game = execute initialGame action |> Option.get
+    Assert.Equal<list<Action>>([ action ], game.History)
