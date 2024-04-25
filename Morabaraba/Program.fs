@@ -34,5 +34,15 @@ let initialGame =
 
     { History = []; Board = board }
 
+let execute game action =
+    let updatedOccupants =
+        Map.add action.Destination game.Board.Player.Shade game.Board.Occupants
+
+    let board =
+        { game.Board with
+            Occupants = updatedOccupants }
+
+    Some { game with Board = board }
+
 [<EntryPoint>]
 let main _ = 0
