@@ -33,3 +33,12 @@ let ``Initial player occupies A1`` () =
     let game = execute initialGame action |> Option.get
     let occupants = game.Board.Occupants
     Assert.Equal(Dark, occupants.[Junction "A1"])
+
+[<Fact>]
+let ``Player is light after initial player has occupied A1`` () =
+    let action =
+        { Source = None
+          Destination = Junction "A1" }
+
+    let game = execute initialGame action |> Option.get
+    Assert.Equal(Light, game.Board.Player.Shade)

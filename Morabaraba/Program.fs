@@ -45,13 +45,31 @@ let executor =
 
         Some { game with Board = updatedBoard }
 
-    Executor(placement, NoExecutor, NoExecutor)
+    let switchTurns game _ =
+        let board = game.Board
+        let player, opponent = board.Player, board.Opponent
+
+        let updatedBoard =
+            { board with
+                Player = opponent
+                Opponent = player }
+
+        Some { game with Board = updatedBoard }
+
+    Executor(placement, Executor(switchTurns, NoExecutor, NoExecutor), NoExecutor)
 
 let execute game action =
-    match executor with
-    | (Executor(placement, _, _)) -> placement game action
-    | NoExecutor -> None
+    let rec innerExecute executor game action =
+        match executor with
+        | (Executor(placement, child, _)) ->
+            let placedGame = placement game action
 
+            match child with
+            | NoExecutor -> placedGame
+            | _ -> Option.bind (fun game -> innerExecute child game action) placedGame
+        | NoExecutor -> None
+
+    innerExecute executor game action
 
 [<EntryPoint>]
 let main _ = 0
