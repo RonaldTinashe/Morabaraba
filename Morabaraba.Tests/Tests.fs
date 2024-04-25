@@ -42,3 +42,12 @@ let ``Player is light after initial player has occupied A1`` () =
 
     let game = execute initialGame action |> Option.get
     Assert.Equal(Light, game.Board.Player.Shade)
+
+[<Fact>]
+let ``Initial dark competitor should have 11 cows after occupying A1`` () =
+    let action =
+        { Source = None
+          Destination = Junction "A1" }
+
+    let game = execute initialGame action |> Option.get
+    Assert.Equal(11, game.Board.Opponent.Hand)

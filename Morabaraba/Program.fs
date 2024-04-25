@@ -56,7 +56,21 @@ let executor =
 
         Some { game with Board = updatedBoard }
 
-    Executor(placement, Executor(switchTurns, NoExecutor, NoExecutor), NoExecutor)
+    let decreaseHand game _ =
+        let board = game.Board
+        let opponent = game.Board.Opponent
+
+        let updatedOpponent =
+            { opponent with
+                Hand = opponent.Hand - 1 }
+
+        let updatedBoard =
+            { board with
+                Opponent = updatedOpponent }
+
+        Some { game with Board = updatedBoard }
+
+    Executor(placement, Executor(switchTurns, Executor(decreaseHand, NoExecutor, NoExecutor), NoExecutor), NoExecutor)
 
 let execute game action =
     let rec innerExecute executor game action =
