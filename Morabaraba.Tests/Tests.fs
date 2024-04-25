@@ -15,6 +15,11 @@ let ``Initial opponent's shade is Light`` () =
     Assert.Equal(Light, opponent.Shade)
 
 [<Fact>]
-let ``Player has 12 cows initially`` () =
+let ``Initial player has 12 cows`` () =
     let player = initialGame.Board.Player
     Assert.Equal(12, player.Hand)
+
+[<Fact>]
+let ``Initial opponent has 12 cows`` () =
+    let opponent = initialGame.Board.Opponent
+    Assert.Equal(12, opponent.Hand)
