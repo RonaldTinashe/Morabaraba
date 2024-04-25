@@ -35,14 +35,14 @@ let initialGame =
     { History = []; Board = board }
 
 let execute game action =
-    let updatedOccupants =
-        Map.add action.Destination game.Board.Player.Shade game.Board.Occupants
+    let board = game.Board
+    let updatedOccupants = Map.add action.Destination board.Player.Shade board.Occupants
 
-    let board =
-        { game.Board with
+    let updatedBoard =
+        { board with
             Occupants = updatedOccupants }
 
-    Some { game with Board = board }
+    Some { game with Board = updatedBoard }
 
 [<EntryPoint>]
 let main _ = 0
