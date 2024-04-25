@@ -24,7 +24,7 @@ type Executor =
     | NoExecutor
 
 let initialGame =
-    let player = { Shade = Dark; Hand = 0 }
+    let player = { Shade = Dark; Hand = 12 }
     let opponent = { player with Shade = Light }
 
     let board =
