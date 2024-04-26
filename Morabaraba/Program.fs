@@ -121,6 +121,16 @@ let executor =
 
         if List.exists isAMill lines then Some game else None
 
+    let checkShootingTargetShade game action =
+        let { Board = { Occupants = occupants
+                        Opponent = opponent } } =
+            game
+
+        let isShadeAppropriate =
+            Map.tryFind action.Destination occupants = Some opponent.Shade
+
+        if isShadeAppropriate then Some game else None
+
     let shoot game action =
         let updatedOccupants = Map.remove action.Destination game.Board.Occupants
 
@@ -161,10 +171,14 @@ let executor =
         BinaryTree.Node(
             checkPlayerMill,
             BinaryTree.Node(
-                shoot,
+                checkShootingTargetShade,
                 BinaryTree.Node(
-                    saveAction,
-                    BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
+                    shoot,
+                    BinaryTree.Node(
+                        saveAction,
+                        BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
+                        BinaryTree.NoValue
+                    ),
                     BinaryTree.NoValue
                 ),
                 BinaryTree.NoValue
