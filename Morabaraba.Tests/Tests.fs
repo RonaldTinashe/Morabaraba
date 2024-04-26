@@ -112,3 +112,21 @@ let ``Do not switch turns after dark player forms a mill`` () =
         (Some initialGame)
     |> Option.get
     |> fun { Board = { Player = player } } -> Assert.Equal(Dark, player.Shade)
+
+[<Fact>]
+let ``Allow dark player to remove light cow if they have a mill`` () =
+    let target = Junction "R1"
+
+    [ Junction "A1"; target; Junction "A2"; Junction "R2"; Junction "A3"; target ]
+    |> List.fold
+        (fun gameState junction ->
+            Option.bind
+                (fun game ->
+                    execute
+                        game
+                        { Source = None
+                          Destination = junction })
+                gameState)
+        (Some initialGame)
+    |> Option.get
+    |> fun { Board = { Occupants = occupants } } -> Assert.False(Map.containsKey target occupants)

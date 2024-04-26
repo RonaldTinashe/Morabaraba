@@ -121,6 +121,15 @@ let executor =
 
         if List.exists isAMill lines then Some game else None
 
+    let shoot game action =
+        let updatedOccupants = Map.remove action.Destination game.Board.Occupants
+
+        Some
+            { game with
+                Board =
+                    { game.Board with
+                        Occupants = updatedOccupants } }
+
     let saveAction game action =
         Some
             { game with
@@ -149,7 +158,19 @@ let executor =
             ),
             BinaryTree.NoValue
         ),
-        BinaryTree.NoValue
+        BinaryTree.Node(
+            checkPlayerMill,
+            BinaryTree.Node(
+                shoot,
+                BinaryTree.Node(
+                    saveAction,
+                    BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
+                    BinaryTree.NoValue
+                ),
+                BinaryTree.NoValue
+            ),
+            BinaryTree.NoValue
+        )
     )
     |> Executor
 
