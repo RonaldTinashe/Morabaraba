@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="BinaryTree.fs" />
     <Compile Include="Pervasives.fs" />
+    <Compile Include="Executor.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 </Project>

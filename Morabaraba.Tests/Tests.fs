@@ -3,6 +3,7 @@ module Morabaraba.Tests
 open System
 open Xunit
 open Morabaraba
+open Executor
 
 [<Fact>]
 let ``Initial player's shade is Dark`` () =
