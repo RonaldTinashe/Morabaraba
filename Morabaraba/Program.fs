@@ -6,12 +6,21 @@ module BinaryTree =
         | Node of value: 'T * left: Node<'T> * right: Node<'T>
         | NoValue
 
-    let rec fold folder state tree =
+    let rec fold folder shouldSelectLeft state tree =
         match tree with
         | NoValue -> state
-        | Node(value, left, _) ->
-            let state = folder state value
-            fold folder state left
+        | Node(value, left, right) ->
+            let state2 = folder state value
+
+            if shouldSelectLeft state2 then
+                let state3 = fold folder shouldSelectLeft state2 left
+                state3
+            else
+                match right with
+                | NoValue -> state2
+                | Node _ ->
+                    let state4 = fold folder shouldSelectLeft state right
+                    state4
 
 type Shade =
     | Dark
@@ -81,17 +90,36 @@ let executor =
 
     let decreaseHand game _ =
         let board = game.Board
-        let opponent = game.Board.Opponent
+        let player = game.Board.Player
 
-        let updatedOpponent =
-            { opponent with
-                Hand = opponent.Hand - 1 }
+        let updatedPlayer = { player with Hand = player.Hand - 1 }
 
-        let updatedBoard =
-            { board with
-                Opponent = updatedOpponent }
+        let updatedBoard = { board with Player = updatedPlayer }
 
         Some { game with Board = updatedBoard }
+
+    let checkPlayerMill game _ =
+        let lines =
+            let flip a b c = a c b
+            let createJunction (letter: char) (number: int) = Junction $"{letter}{number}"
+
+            let sameLetterLines =
+                let numbersLines = [ [ 1; 2; 3 ]; [ 7; 6; 5 ]; [ 1; 8; 7 ]; [ 3; 4; 5 ] ]
+                let letters = [ 'E'; 'A'; 'R' ]
+                List.collect (fun l -> List.map (fun nl -> List.map (createJunction l) nl) numbersLines) letters
+
+            let sameNumberLines =
+                [ 1..8 ]
+                |> List.map (fun number -> List.map ((flip createJunction) number) [ 'E'; 'A'; 'R' ])
+
+            sameLetterLines @ sameNumberLines
+
+        let isAMill line =
+            let player = game.Board.Player
+            let occupants = game.Board.Occupants
+            List.forall (fun junction -> Map.tryFind junction occupants = Some player.Shade) line
+
+        if List.exists isAMill lines then Some game else None
 
     let saveAction game action =
         Some
@@ -99,16 +127,20 @@ let executor =
                 History = action :: game.History }
 
     BinaryTree.Node(
-        checkPlacingHand,
+        checkPlacingDestination,
         BinaryTree.Node(
-            checkPlacingDestination,
+            checkPlacingHand,
             BinaryTree.Node(
                 place,
                 BinaryTree.Node(
-                    switchTurns,
+                    saveAction,
                     BinaryTree.Node(
                         decreaseHand,
-                        BinaryTree.Node(saveAction, BinaryTree.NoValue, BinaryTree.NoValue),
+                        BinaryTree.Node(
+                            checkPlayerMill,
+                            BinaryTree.NoValue,
+                            BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue)
+                        ),
                         BinaryTree.NoValue
                     ),
                     BinaryTree.NoValue
@@ -126,7 +158,7 @@ let execute game action =
         Option.bind (fun gameValue -> ruleExecution gameValue action) gameOption
 
     match executor with
-    | Executor e -> BinaryTree.fold executionFolder (Some game) e
+    | Executor e -> BinaryTree.fold executionFolder Option.isSome (Some game) e
 
 [<EntryPoint>]
 let main _ = 0

@@ -96,3 +96,19 @@ let ``Save action after first action is executed`` () =
 
     let game = execute initialGame action |> Option.get
     Assert.Equal<list<Action>>([ action ], game.History)
+
+[<Fact>]
+let ``Do not switch turns after dark player forms a mill`` () =
+    [ Junction "A1"; Junction "R1"; Junction "A2"; Junction "R2"; Junction "A3" ]
+    |> List.fold
+        (fun gameState junction ->
+            Option.bind
+                (fun game ->
+                    execute
+                        game
+                        { Source = None
+                          Destination = junction })
+                gameState)
+        (Some initialGame)
+    |> Option.get
+    |> fun { Board = { Player = player } } -> Assert.Equal(Dark, player.Shade)
