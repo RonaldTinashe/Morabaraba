@@ -119,6 +119,26 @@ let checkAllOpponentCowsAreInMills game _ =
     else
         None
 
+let checkPlayerMillIsNew game _ =
+    let playerShade = game.Board.Player.Shade
+
+    let playerOccupants =
+        Map.filter (fun _ shade -> shade = playerShade) game.Board.Occupants
+
+    let junctionsInPlayerMills =
+        List.filter (isAMill playerShade playerOccupants) lines
+        |> List.concat
+        |> List.distinct
+
+    List.tryHead game.History
+    |> Option.map (fun { Destination = d } ->
+        if List.contains d junctionsInPlayerMills then
+            Some game
+        else
+            None)
+    |> Option.flatten
+
+
 let shoot game action =
     let updatedOccupants = Map.remove action.Destination game.Board.Occupants
 
@@ -176,7 +196,7 @@ let executorTree =
 
     let placeOrMill =
         BinaryTree.Node(
-            checkPlayerLastOccupied,
+            checkPlayerMillIsNew,
             shoot',
             BinaryTree.Node(
                 checkPlacingDestination,

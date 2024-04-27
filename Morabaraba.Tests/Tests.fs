@@ -195,3 +195,18 @@ let ``Dark player can shoot a light cow if all light cows are in a mill`` () =
                 gameState)
         (Some initialGame)
     |> fun gameOption -> Assert.NotEqual(None, gameOption)
+
+[<Fact>]
+let ``Dark player can only shoot with a newly formed mill`` () =
+    [ "A1"; "R1"; "A2"; "R2"; "A3"; "R2"; "R2"; "A4"; "R2" ] // Mill "A1;A2;A3" cannot be reused
+    |> List.fold
+        (fun gameState junction ->
+            Option.bind
+                (fun game ->
+                    execute
+                        game
+                        { Source = None
+                          Destination = Junction junction })
+                gameState)
+        (Some initialGame)
+    |> fun gameOption -> Assert.Equal(None, gameOption)
