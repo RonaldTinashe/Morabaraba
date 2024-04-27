@@ -43,6 +43,19 @@ let decreaseHand game _ =
 
     Some { game with Board = updatedBoard }
 
+let checkPlayerLastOccupied game _ =
+    List.tryHead game.History
+    |> Option.map (fun { Destination = d } ->
+        Option.map
+            (fun cowShade ->
+                if game.Board.Player.Shade = cowShade then
+                    Some game
+                else
+                    None)
+            (Map.tryFind d game.Board.Occupants))
+    |> Option.flatten
+    |> Option.flatten
+
 let checkPlayerMill game _ =
     let lines =
         let flip a b c = a c b
@@ -128,7 +141,15 @@ let executorTree =
         )
 
     let placeOrMill =
-        BinaryTree.Node(checkPlacingDestination, BinaryTree.Node(checkPlacingHand, place', BinaryTree.NoValue), mill)
+        BinaryTree.Node(
+            checkPlayerLastOccupied,
+            mill,
+            BinaryTree.Node(
+                checkPlacingDestination,
+                BinaryTree.Node(checkPlacingHand, place', BinaryTree.NoValue),
+                BinaryTree.NoValue
+            )
+        )
 
     placeOrMill
 
