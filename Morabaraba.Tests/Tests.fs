@@ -227,7 +227,8 @@ let gameAfterMovementSimulation =
         { game with
             Board =
                 { game.Board with
-                    Player = { game.Board.Player with Hand = 0 } } })
+                    Player = { game.Board.Player with Hand = 0 }
+                    Opponent = { game.Board.Opponent with Hand = 0 } } })
     |> Option.bind (fun game ->
         execute
             game
@@ -259,3 +260,13 @@ let ``After dark player moves cow and does not form a mill, the next player is l
     match gameAfterMovementSimulation with
     | Some { Board = { Player = { Shade = s } } } -> Assert.Equal(Light, s)
     | None -> Assert.Fail(sprintf "Failed to move cow. Current game state is %A" gameAfterMovementSimulation)
+
+[<Fact>]
+let ``Player cannot fly with more than three cows on the board`` () =
+    gameAfterMovementSimulation
+    |> Option.bind (fun game ->
+        execute
+            game
+            { Source = Some(Junction "R1")
+              Destination = Junction "R7" })
+    |> fun illegalGame -> Assert.Equal(None, illegalGame)

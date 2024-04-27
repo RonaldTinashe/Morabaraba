@@ -1,9 +1,11 @@
 module Morabaraba.Execution
 
 // Helpers
+let createJunction (letter: char) (number: int) = Junction $"{letter}{number}"
+let boardNumbers = [ 1..8 ]
+
 let lines =
     let flip a b c = a c b
-    let createJunction (letter: char) (number: int) = Junction $"{letter}{number}"
 
     let sameLetterLines =
         let numbersLines = [ [ 1; 2; 3 ]; [ 7; 6; 5 ]; [ 1; 8; 7 ]; [ 3; 4; 5 ] ]
@@ -11,7 +13,7 @@ let lines =
         List.collect (fun l -> List.map (fun nl -> List.map (createJunction l) nl) numbersLines) letters
 
     let sameNumberLines =
-        [ 1..8 ]
+        boardNumbers
         |> List.map (fun number -> List.map ((flip createJunction) number) [ 'E'; 'A'; 'R' ])
 
     sameLetterLines @ sameNumberLines
@@ -126,6 +128,34 @@ let shoot game action =
                 { game.Board with
                     Occupants = updatedOccupants } }
 
+let checkMovingJunctions game action =
+    let sameLetterNeighbours =
+        let numbers = [ 1, 2; 2, 3; 7, 6; 6, 5; 1, 8; 8, 7; 3, 4; 4, 5 ]
+        let letters = [ 'E'; 'A'; 'R' ]
+
+        List.collect
+            (fun letter -> List.map (fun (n1, n2) -> (createJunction letter n1), (createJunction letter n2)) numbers)
+            letters
+
+    let sameNumberNeigbours =
+        let letterNeighbours = [ 'E', 'A'; 'A', 'R' ]
+
+        List.collect
+            (fun (letter1, letter2) ->
+                List.map (fun n -> (createJunction letter1 n), (createJunction letter2 n)) boardNumbers)
+            letterNeighbours
+
+    let neighbours = sameLetterNeighbours @ sameNumberNeigbours
+
+    let areJunctionsNeighbours =
+        match action.Source with
+        | Some source ->
+            List.contains (source, action.Destination) neighbours
+            || List.contains (action.Destination, source) neighbours
+        | None -> false
+
+    if areJunctionsNeighbours then Some game else None
+
 let move game action =
     Option.map (fun source -> Map.remove source game.Board.Occupants) action.Source
     |> Option.map (Map.add action.Destination game.Board.Player.Shade)
@@ -191,8 +221,12 @@ let executorTree =
                     checkPlacingHand,
                     place',
                     BinaryTree.Node(
-                        move,
-                        BinaryTree.Node(saveAction, checkMillOrSwitch, BinaryTree.NoValue),
+                        checkMovingJunctions,
+                        BinaryTree.Node(
+                            move,
+                            BinaryTree.Node(saveAction, checkMillOrSwitch, BinaryTree.NoValue),
+                            BinaryTree.NoValue
+                        ),
                         BinaryTree.NoValue
                     )
                 ),
