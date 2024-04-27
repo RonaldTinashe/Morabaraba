@@ -1,7 +1,5 @@
 module Morabaraba.Executor
 
-type Tree = Tree of BinaryTree.Node<Game -> Action -> option<Game>>
-
 let initialGame =
     let player = { Shade = Dark; Hand = 12 }
     let opponent = { player with Shade = Light }
@@ -147,10 +145,8 @@ let execute game action =
                 BinaryTree.NoValue
             )
         )
-        |> Tree
 
     let executionFolder gameOption ruleExecution =
         Option.bind (fun gameValue -> ruleExecution gameValue action) gameOption
 
-    match executorTree with
-    | Tree e -> BinaryTree.fold executionFolder Option.isSome (Some game) e
+    BinaryTree.fold executionFolder Option.isSome (Some game) executorTree
