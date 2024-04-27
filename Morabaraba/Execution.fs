@@ -126,6 +126,15 @@ let shoot game action =
                 { game.Board with
                     Occupants = updatedOccupants } }
 
+let move game action =
+    Option.map (fun source -> Map.remove source game.Board.Occupants) action.Source
+    |> Option.map (Map.add action.Destination game.Board.Player.Shade)
+    |> Option.map (fun occupants ->
+        { game with
+            Board =
+                { game.Board with
+                    Occupants = occupants } })
+
 let saveAction game action =
     Some
         { game with
@@ -178,7 +187,7 @@ let executorTree =
             shoot',
             BinaryTree.Node(
                 checkPlacingDestination,
-                BinaryTree.Node(checkPlacingHand, place', BinaryTree.NoValue),
+                BinaryTree.Node(checkPlacingHand, place', BinaryTree.Node(move, BinaryTree.NoValue, BinaryTree.NoValue)),
                 BinaryTree.NoValue
             )
         )

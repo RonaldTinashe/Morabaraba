@@ -210,3 +210,35 @@ let ``Dark player can only shoot with a newly formed mill`` () =
                 gameState)
         (Some initialGame)
     |> fun gameOption -> Assert.Equal(None, gameOption)
+
+[<Fact>]
+let ``Movement removes source junction occupant, placing them on the destination`` () =
+    let gameAfterExecution =
+        [ "A1"; "R1"; "A2"; "R2"; "A3"; "R2"; "R2"; "A4"; "R3"; "A4"; "A4"; "R4" ]
+        |> List.fold
+            (fun gameState junction ->
+                Option.bind
+                    (fun game ->
+                        execute
+                            game
+                            { Source = None
+                              Destination = Junction junction })
+                    gameState)
+            (Some initialGame)
+        |> Option.map (fun game ->
+            { game with
+                Board =
+                    { game.Board with
+                        Player = { game.Board.Player with Hand = 0 } } })
+        |> Option.bind (fun game ->
+            execute
+                game
+                { Source = Some(Junction "A4")
+                  Destination = Junction "E4" })
+
+    match gameAfterExecution with
+    | None -> Assert.Fail(sprintf "Failed to move cow. Current game state is %A" gameAfterExecution)
+    | Some { Board = { Occupants = o } } ->
+        let sourceJunctionOccupant = Map.tryFind (Junction "A4") o
+        let destinationJunctionOccupant = Map.tryFind (Junction "E4") o
+        Assert.Equal((None, Some Dark), (sourceJunctionOccupant, destinationJunctionOccupant))
