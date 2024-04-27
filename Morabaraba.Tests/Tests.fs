@@ -270,3 +270,53 @@ let ``Player cannot fly with more than three cows on the board`` () =
             { Source = Some(Junction "R1")
               Destination = Junction "R7" })
     |> fun illegalGame -> Assert.Equal(None, illegalGame)
+
+[<Fact>]
+let ``Player cannot create a mill broken to form a new one`` () =
+    let movingPlayer = { Shade = Dark; Hand = 0 } // Hand has 0 for moving phase
+
+    let breakingMovement =
+        { Source = Some(Junction "E6")
+          Destination = Junction "A6" }
+
+    let illegalMovement =
+        { Source = Some breakingMovement.Destination
+          Destination = Option.get breakingMovement.Source }
+
+    [ "E7" // Dark places
+      "E1" // Light places
+      "A7" // Dark places
+      "A1" // Light places
+      "E5" // Dark places
+      "E3" // Light places
+      "A5" // Dark places
+      "A3" // Light places
+      "E6" // Dark places and forms mill
+      "E1" // Dark shoots Light
+      "E1" ] // Light replaces shot cow
+    |> List.fold
+        (fun gameState junction ->
+            let action =
+                { Source = None
+                  Destination = Junction junction }
+
+            Option.bind (fun game -> execute game action) gameState)
+        (Some initialGame)
+    |> Option.map (fun game ->
+        { game with
+            Board =
+                { game.Board with
+                    Player = movingPlayer } })
+    |> Option.bind (fun game -> execute game breakingMovement) // break mill
+    |> Option.bind (fun game ->
+        execute
+            game
+            { Source = None
+              Destination = Junction "E1" }) // Dark shoots Light
+    |> Option.bind (fun game ->
+        execute
+            game
+            { Source = None
+              Destination = Junction "E1" }) // Light places
+    |> Option.bind (fun game -> execute game illegalMovement)
+    |> fun game -> Assert.Equal(None, game)

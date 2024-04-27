@@ -156,6 +156,41 @@ let checkMovingJunctions game action =
 
     if areJunctionsNeighbours then Some game else None
 
+let checkLegalMillFormation game action =
+    let occupantsWithBrokenMill =
+        Map.add action.Destination game.Board.Player.Shade game.Board.Occupants
+
+    let wasInAMill =
+        let millJunctions =
+            junctionsInMillsByShade game.Board.Player.Shade occupantsWithBrokenMill
+
+        List.contains action.Destination millJunctions
+
+    let isInAMill =
+        let millJunctions =
+            junctionsInMillsByShade game.Board.Player.Shade game.Board.Occupants
+
+        List.exists (fun junction -> Some junction = action.Source) millJunctions
+
+    let isActionReverseOfPrevious =
+        // Action indexed 0 is the opponent's last action
+        // Action indexed 1 is the player's last shot action
+        // Action indexed 2 is the player's last non-shot action
+        let lastNonShotActionIndex = 2
+        let lastNonShotAction = List.tryItem lastNonShotActionIndex game.History
+
+        match lastNonShotAction with
+        | Some { Source = Some previousSource
+                 Destination = previousDestination } ->
+            action = { Source = Some previousDestination
+                       Destination = previousSource }
+        | _ -> false
+
+    if wasInAMill && isInAMill && isActionReverseOfPrevious then
+        None
+    else
+        Some game
+
 let move game action =
     Option.map (fun source -> Map.remove source game.Board.Occupants) action.Source
     |> Option.map (Map.add action.Destination game.Board.Player.Shade)
@@ -214,7 +249,12 @@ let executorTree =
     let moveExecution =
         BinaryTree.Node(move, BinaryTree.Node(saveAction, checkMillOrSwitch, BinaryTree.NoValue), BinaryTree.NoValue)
 
-    let move' = BinaryTree.Node(checkMovingJunctions, moveExecution, BinaryTree.NoValue)
+    let move' =
+        BinaryTree.Node(
+            checkMovingJunctions,
+            BinaryTree.Node(checkLegalMillFormation, moveExecution, BinaryTree.NoValue),
+            BinaryTree.NoValue
+        )
 
     let placeOrMill =
         BinaryTree.Node(
