@@ -90,6 +90,49 @@ let saveAction game action =
         { game with
             History = action :: game.History }
 
+let executorTree =
+    BinaryTree.Node(
+        checkPlacingDestination,
+        BinaryTree.Node(
+            checkPlacingHand,
+            BinaryTree.Node(
+                place,
+                BinaryTree.Node(
+                    saveAction,
+                    BinaryTree.Node(
+                        decreaseHand,
+                        BinaryTree.Node(
+                            checkPlayerMill,
+                            BinaryTree.NoValue,
+                            BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue)
+                        ),
+                        BinaryTree.NoValue
+                    ),
+                    BinaryTree.NoValue
+                ),
+                BinaryTree.NoValue
+            ),
+            BinaryTree.NoValue
+        ),
+        BinaryTree.Node(
+            checkPlayerMill,
+            BinaryTree.Node(
+                checkShootingTargetShade,
+                BinaryTree.Node(
+                    shoot,
+                    BinaryTree.Node(
+                        saveAction,
+                        BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
+                        BinaryTree.NoValue
+                    ),
+                    BinaryTree.NoValue
+                ),
+                BinaryTree.NoValue
+            ),
+            BinaryTree.NoValue
+        )
+    )
+
 let initialGame =
     let player = { Shade = Dark; Hand = 12 }
     let opponent = { player with Shade = Light }
@@ -102,49 +145,6 @@ let initialGame =
     { History = []; Board = board }
 
 let execute game action =
-
-    let executorTree =
-        BinaryTree.Node(
-            checkPlacingDestination,
-            BinaryTree.Node(
-                checkPlacingHand,
-                BinaryTree.Node(
-                    place,
-                    BinaryTree.Node(
-                        saveAction,
-                        BinaryTree.Node(
-                            decreaseHand,
-                            BinaryTree.Node(
-                                checkPlayerMill,
-                                BinaryTree.NoValue,
-                                BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue)
-                            ),
-                            BinaryTree.NoValue
-                        ),
-                        BinaryTree.NoValue
-                    ),
-                    BinaryTree.NoValue
-                ),
-                BinaryTree.NoValue
-            ),
-            BinaryTree.Node(
-                checkPlayerMill,
-                BinaryTree.Node(
-                    checkShootingTargetShade,
-                    BinaryTree.Node(
-                        shoot,
-                        BinaryTree.Node(
-                            saveAction,
-                            BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
-                            BinaryTree.NoValue
-                        ),
-                        BinaryTree.NoValue
-                    ),
-                    BinaryTree.NoValue
-                ),
-                BinaryTree.NoValue
-            )
-        )
 
     let executionFolder gameOption ruleExecution =
         Option.bind (fun gameValue -> ruleExecution gameValue action) gameOption
