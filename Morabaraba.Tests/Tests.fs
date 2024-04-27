@@ -272,7 +272,7 @@ let ``Player cannot fly with more than three cows on the board`` () =
     |> fun illegalGame -> Assert.Equal(None, illegalGame)
 
 [<Fact>]
-let ``Restrict broken mill recreation after opponent's non-shot move`` () =
+let ``Restrict broken mill recreation after opponent's non-shot action`` () =
     let movingPlayer = { Shade = Dark; Hand = 0 } // Hand has 0 for moving phase
 
     let breakingMovement =
@@ -318,5 +318,62 @@ let ``Restrict broken mill recreation after opponent's non-shot move`` () =
             game
             { Source = None
               Destination = Junction "E1" }) // Light places
+    |> Option.bind (fun game -> execute game illegalMovement)
+    |> fun game -> Assert.Equal(None, game)
+
+[<Fact>]
+let ``Restrict broken mill recreation after opponent's shot action`` () =
+    let movingPlayer = { Shade = Dark; Hand = 0 } // Hand has 0 for moving phase
+
+    let breakingMovement =
+        { Source = Some(Junction "E6")
+          Destination = Junction "A6" }
+
+    let illegalMovement =
+        { Source = Some breakingMovement.Destination
+          Destination = Option.get breakingMovement.Source }
+
+    [ "E7" // Dark places
+      "E1" // Light places
+      "A7" // Dark places
+      "A1" // Light places
+      "E5" // Dark places
+      "E3" // Light places
+      "R4" // Dark places
+      "A4" // Light places
+      "A5" // Dark places
+      "A3" // Light places
+      "E6" // Dark places and forms mill
+      "E1" // Dark shoots Light
+      "E1" ] // Light replaces shot cow
+    |> List.fold
+        (fun gameState junction ->
+            let action =
+                { Source = None
+                  Destination = Junction junction }
+
+            Option.bind (fun game -> execute game action) gameState)
+        (Some initialGame)
+    |> Option.map (fun game ->
+        { game with
+            Board =
+                { game.Board with
+                    Player = movingPlayer } })
+    |> Option.bind (fun game -> execute game breakingMovement) // break mill
+    |> Option.bind (fun game ->
+        execute
+            game
+            { Source = None
+              Destination = Junction "E1" }) // Dark shoots Light
+    |> Option.bind (fun game ->
+        execute
+            game
+            { Source = None
+              Destination = Junction "A2" }) // Light places
+    |> Option.bind (fun game ->
+        execute
+            game
+            { Source = None
+              Destination = Junction "R4" }) // Light shoots
     |> Option.bind (fun game -> execute game illegalMovement)
     |> fun game -> Assert.Equal(None, game)

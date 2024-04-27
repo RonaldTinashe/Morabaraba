@@ -172,11 +172,19 @@ let checkLegalMillFormation game action =
 
         List.exists (fun junction -> Some junction = action.Source) millJunctions
 
+    let wasOpponentLastActionAShot =
+        let lastOpponentAction = List.tryHead game.History
+
+        match lastOpponentAction with
+        | Some { Source = None; Destination = d } -> not <| Map.containsKey d game.Board.Occupants
+        | _ -> false
+
     let isActionReverseOfPrevious =
         // Action indexed 0 is the opponent's last action
         // Action indexed 1 is the player's last shot action
-        // Action indexed 2 is the player's last non-shot action
-        let lastNonShotActionIndex = 2
+        // Action indexed 2 might the player's last non-action action without a shot
+        // Action indexed 3 might be the player last action before a shot
+        let lastNonShotActionIndex = if wasOpponentLastActionAShot then 3 else 2
         let lastNonShotAction = List.tryItem lastNonShotActionIndex game.History
 
         match lastNonShotAction with
