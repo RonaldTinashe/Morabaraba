@@ -211,7 +211,18 @@ let ``Dark player can only shoot with a newly formed mill`` () =
     |> fun boardOption -> Assert.Equal(None, boardOption)
 
 let boardAfterMovementSimulation =
-    [ "A1"; "R1"; "A2"; "R2"; "A3"; "R2"; "R2"; "A4"; "R3"; "A4"; "A4"; "R4" ]
+    [ "A1" // Dark places
+      "R1" // Light places
+      "A2" // Dark places
+      "R2" // Light places
+      "A3" // Dark places forming a mill
+      "R2" // Dark shoots Light
+      "R2" // Light replaces shot cow
+      "A4" // Dark places
+      "R3" // Light places forming a mill
+      "A4" // Light shoots Dark
+      "A4" // Dark replaces shot cow
+      "R4" ] // Light places
     |> List.fold
         (fun boardState junction ->
             Option.bind
@@ -367,3 +378,25 @@ let ``Restrict broken mill recreation after opponent's shot action`` () =
               Destination = Junction "R4" }) // Light shoots
     |> Option.bind (fun board -> execute board illegalMovement)
     |> fun board -> Assert.Equal(None, board)
+
+[<Fact>]
+let ``Player with three cows on the board and an empty hand can fly`` () =
+    let player = { Shade = Dark; Hand = 0 }
+
+    let occupants =
+        [ "A1", Dark; "A2", Light; "A3", Dark; "E3", Light; "A6", Dark; "E5", Light ]
+        |> List.map (fun (junction, shade) -> (Junction junction), shade)
+        |> Map
+
+    let movement =
+        { Source = Some(Junction "A1")
+          Destination = Junction "E7" }
+
+    let board =
+        { Player = player
+          Opponent = { player with Shade = Light }
+          History = []
+          Occupants = occupants }
+
+    let boardAfterExecution = execute board movement
+    Assert.NotEqual(None, boardAfterExecution)

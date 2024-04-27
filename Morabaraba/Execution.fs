@@ -187,6 +187,10 @@ let move board action =
     |> Option.map (Map.add action.Destination board.Player.Shade)
     |> Option.map (fun occupants -> { board with Occupants = occupants })
 
+let checkCowCountAllowsFlying board _ =
+    let occupantCount = occupantsByShade board.Player.Shade board.Occupants |> Map.count
+    if occupantCount = 3 then Some board else None
+
 let saveAction board action =
     Some
         { board with
@@ -240,7 +244,7 @@ let executorTree =
         BinaryTree.Node(
             checkMovingJunctions,
             BinaryTree.Node(checkLegalMillFormation, moveExecution, BinaryTree.NoValue),
-            BinaryTree.NoValue
+            BinaryTree.Node(checkCowCountAllowsFlying, moveExecution, BinaryTree.NoValue)
         )
 
     let placeOrMill =
