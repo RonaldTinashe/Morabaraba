@@ -177,3 +177,26 @@ let ``Light player cannot shoot an empty junction`` () =
                 gameState)
         (Some initialGame)
     |> fun gameOption -> Assert.Equal(None, gameOption)
+
+[<Fact>]
+let ``Dark player cannot shoot a dark cow in a mill`` () =
+    [ Junction "A1"
+      Junction "R1"
+      Junction "A2"
+      Junction "R2"
+      Junction "A8"
+      Junction "R3"
+      Junction "A8"
+      Junction "A3"
+      Junction "R3" ]
+    |> List.fold
+        (fun gameState junction ->
+            Option.bind
+                (fun game ->
+                    execute
+                        game
+                        { Source = None
+                          Destination = junction })
+                gameState)
+        (Some initialGame)
+    |> fun gameOption -> Assert.Equal(None, gameOption)
