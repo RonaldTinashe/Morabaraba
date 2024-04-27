@@ -211,25 +211,18 @@ let executorTree =
             BinaryTree.NoValue
         )
 
+    let moveExecution =
+        BinaryTree.Node(move, BinaryTree.Node(saveAction, checkMillOrSwitch, BinaryTree.NoValue), BinaryTree.NoValue)
+
+    let move' = BinaryTree.Node(checkMovingJunctions, moveExecution, BinaryTree.NoValue)
+
     let placeOrMill =
         BinaryTree.Node(
             checkPlayerMillIsNew,
             shoot',
             BinaryTree.Node(
                 checkPlacingDestination,
-                BinaryTree.Node(
-                    checkPlacingHand,
-                    place',
-                    BinaryTree.Node(
-                        checkMovingJunctions,
-                        BinaryTree.Node(
-                            move,
-                            BinaryTree.Node(saveAction, checkMillOrSwitch, BinaryTree.NoValue),
-                            BinaryTree.NoValue
-                        ),
-                        BinaryTree.NoValue
-                    )
-                ),
+                BinaryTree.Node(checkPlacingHand, place', move'),
                 BinaryTree.NoValue
             )
         )
