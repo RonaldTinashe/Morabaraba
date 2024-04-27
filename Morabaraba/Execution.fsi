@@ -1,5 +1,5 @@
 module Morabaraba.Execution
 
-val initialGame: Game
+val initialBoard: Board
 
-val execute: Game -> Action -> option<Game>
+val execute: Board -> Action -> option<Board>

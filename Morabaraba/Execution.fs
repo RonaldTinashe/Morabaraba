@@ -32,103 +32,87 @@ let junctionsInMillsByShade competitorShade occupants =
     |> List.distinct
 
 // Executors
-let checkPlacingHand game _ =
-    let player = game.Board.Player
-    if player.Hand > 0 then Some game else None
+let checkPlacingHand board _ =
+    let player = board.Player
+    if player.Hand > 0 then Some board else None
 
-let checkPlacingDestination game action =
-    let occupants = game.Board.Occupants
+let checkPlacingDestination board action =
+    let occupants = board.Occupants
 
     if Map.containsKey action.Destination occupants then
         None
     else
-        Some game
+        Some board
 
-let place game action =
-    let board = game.Board
+let place board action =
     let updatedOccupants = Map.add action.Destination board.Player.Shade board.Occupants
 
-    let updatedBoard =
+    Some
         { board with
             Occupants = updatedOccupants }
 
-    Some { game with Board = updatedBoard }
-
-let switchTurns game _ =
-    let board = game.Board
+let switchTurns board _ =
     let player, opponent = board.Player, board.Opponent
 
-    let updatedBoard =
+    Some
         { board with
             Player = opponent
             Opponent = player }
 
-    Some { game with Board = updatedBoard }
-
-let decreaseHand game _ =
-    let board = game.Board
-    let player = game.Board.Player
+let decreaseHand board _ =
+    let player = board.Player
 
     let updatedPlayer = { player with Hand = player.Hand - 1 }
 
-    let updatedBoard = { board with Player = updatedPlayer }
+    Some { board with Player = updatedPlayer }
 
-    Some { game with Board = updatedBoard }
-
-let checkShootingTargetShade game action =
-    let { Board = { Occupants = occupants
-                    Opponent = opponent } } =
-        game
-
+let checkShootingTargetShade board action =
     let isShadeAppropriate =
-        Map.tryFind action.Destination occupants = Some opponent.Shade
+        Map.tryFind action.Destination board.Occupants = Some board.Opponent.Shade
 
-    if isShadeAppropriate then Some game else None
+    if isShadeAppropriate then Some board else None
 
-let checkShootingTargetNotInMill game action =
-    let shade = game.Board.Opponent.Shade
-    let occupants = game.Board.Occupants
+let checkShootingTargetNotInMill board action =
+    let shade = board.Opponent.Shade
+    let occupants = board.Occupants
 
     let isDestinationInMill =
         List.filter (isAMill shade occupants) lines
         |> List.exists (List.contains action.Destination)
 
-    if isDestinationInMill then None else Some game
+    if isDestinationInMill then None else Some board
 
-let checkAllOpponentCowsAreInMills game _ =
-    let opponentShade = game.Board.Opponent.Shade
-    let opponentOccupants = occupantsByShade opponentShade game.Board.Occupants
+let checkAllOpponentCowsAreInMills board _ =
+    let opponentOccupants = occupantsByShade board.Opponent.Shade board.Occupants
 
     let junctionsInOpponentMills =
-        junctionsInMillsByShade opponentShade game.Board.Occupants
+        junctionsInMillsByShade board.Opponent.Shade board.Occupants
 
     if List.length junctionsInOpponentMills = Map.count opponentOccupants then
-        Some game
+        Some board
     else
         None
 
-let checkPlayerMillIsNew game _ =
+let checkPlayerMillIsNew board _ =
     let junctionsInPlayerMills =
-        junctionsInMillsByShade game.Board.Player.Shade game.Board.Occupants
+        junctionsInMillsByShade board.Player.Shade board.Occupants
 
-    List.tryHead game.History
+    List.tryHead board.History
     |> Option.map (fun { Destination = d } ->
         if List.contains d junctionsInPlayerMills then
-            Some game
+            Some board
         else
             None)
     |> Option.flatten
 
-let shoot game action =
-    let updatedOccupants = Map.remove action.Destination game.Board.Occupants
+let shoot board action =
+    let updatedOccupants = Map.remove action.Destination board.Occupants
 
     Some
-        { game with
-            Board =
-                { game.Board with
-                    Occupants = updatedOccupants } }
+        { board with
+            Occupants = updatedOccupants }
 
-let checkMovingJunctions game action =
+let checkMovingJunctions board action =
     let sameLetterNeighbours =
         let numbers = [ 1, 2; 2, 3; 7, 6; 6, 5; 1, 8; 8, 7; 3, 4; 4, 5 ]
         let letters = [ 'E'; 'A'; 'R' ]
@@ -154,29 +138,28 @@ let checkMovingJunctions game action =
             || List.contains (action.Destination, source) neighbours
         | None -> false
 
-    if areJunctionsNeighbours then Some game else None
+    if areJunctionsNeighbours then Some board else None
 
-let checkLegalMillFormation game action =
+let checkLegalMillFormation board action =
     let occupantsWithBrokenMill =
-        Map.add action.Destination game.Board.Player.Shade game.Board.Occupants
+        Map.add action.Destination board.Player.Shade board.Occupants
 
     let wasInAMill =
         let millJunctions =
-            junctionsInMillsByShade game.Board.Player.Shade occupantsWithBrokenMill
+            junctionsInMillsByShade board.Player.Shade occupantsWithBrokenMill
 
         List.contains action.Destination millJunctions
 
     let isInAMill =
-        let millJunctions =
-            junctionsInMillsByShade game.Board.Player.Shade game.Board.Occupants
+        let millJunctions = junctionsInMillsByShade board.Player.Shade board.Occupants
 
         List.exists (fun junction -> Some junction = action.Source) millJunctions
 
     let wasOpponentLastActionAShot =
-        let lastOpponentAction = List.tryHead game.History
+        let lastOpponentAction = List.tryHead board.History
 
         match lastOpponentAction with
-        | Some { Source = None; Destination = d } -> not <| Map.containsKey d game.Board.Occupants
+        | Some { Source = None; Destination = d } -> not <| Map.containsKey d board.Occupants
         | _ -> false
 
     let isActionReverseOfPrevious =
@@ -185,7 +168,7 @@ let checkLegalMillFormation game action =
         // Action indexed 2 might the player's last non-action action without a shot
         // Action indexed 3 might be the player last action before a shot
         let lastNonShotActionIndex = if wasOpponentLastActionAShot then 3 else 2
-        let lastNonShotAction = List.tryItem lastNonShotActionIndex game.History
+        let lastNonShotAction = List.tryItem lastNonShotActionIndex board.History
 
         match lastNonShotAction with
         | Some { Source = Some previousSource
@@ -197,21 +180,17 @@ let checkLegalMillFormation game action =
     if wasInAMill && isInAMill && isActionReverseOfPrevious then
         None
     else
-        Some game
+        Some board
 
-let move game action =
-    Option.map (fun source -> Map.remove source game.Board.Occupants) action.Source
-    |> Option.map (Map.add action.Destination game.Board.Player.Shade)
-    |> Option.map (fun occupants ->
-        { game with
-            Board =
-                { game.Board with
-                    Occupants = occupants } })
+let move board action =
+    Option.map (fun source -> Map.remove source board.Occupants) action.Source
+    |> Option.map (Map.add action.Destination board.Player.Shade)
+    |> Option.map (fun occupants -> { board with Occupants = occupants })
 
-let saveAction game action =
+let saveAction board action =
     Some
-        { game with
-            History = action :: game.History }
+        { board with
+            History = action :: board.History }
 
 let executorTree =
     let shootExecution =
@@ -277,20 +256,18 @@ let executorTree =
 
     placeOrMill
 
-let initialGame =
+let initialBoard =
     let player = { Shade = Dark; Hand = 12 }
     let opponent = { player with Shade = Light }
 
-    let board =
-        { Player = player
-          Opponent = opponent
-          Occupants = Map.empty }
+    { Player = player
+      Opponent = opponent
+      Occupants = Map.empty
+      History = [] }
 
-    { History = []; Board = board }
+let execute board action =
 
-let execute game action =
+    let executionFolder boardOption ruleExecution =
+        Option.bind (fun boardValue -> ruleExecution boardValue action) boardOption
 
-    let executionFolder gameOption ruleExecution =
-        Option.bind (fun gameValue -> ruleExecution gameValue action) gameOption
-
-    BinaryTree.fold executionFolder Option.isSome (Some game) executorTree
+    BinaryTree.fold executionFolder Option.isSome (Some board) executorTree
