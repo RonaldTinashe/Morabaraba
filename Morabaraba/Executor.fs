@@ -91,47 +91,46 @@ let saveAction game action =
             History = action :: game.History }
 
 let executorTree =
-    BinaryTree.Node(
-        checkPlacingDestination,
+    let shootExecution =
         BinaryTree.Node(
-            checkPlacingHand,
+            shoot,
             BinaryTree.Node(
-                place,
-                BinaryTree.Node(
-                    saveAction,
-                    BinaryTree.Node(
-                        decreaseHand,
-                        BinaryTree.Node(
-                            checkPlayerMill,
-                            BinaryTree.NoValue,
-                            BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue)
-                        ),
-                        BinaryTree.NoValue
-                    ),
-                    BinaryTree.NoValue
-                ),
-                BinaryTree.NoValue
-            ),
-            BinaryTree.NoValue
-        ),
-        BinaryTree.Node(
-            checkPlayerMill,
-            BinaryTree.Node(
-                checkShootingTargetShade,
-                BinaryTree.Node(
-                    shoot,
-                    BinaryTree.Node(
-                        saveAction,
-                        BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
-                        BinaryTree.NoValue
-                    ),
-                    BinaryTree.NoValue
-                ),
+                saveAction,
+                BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
                 BinaryTree.NoValue
             ),
             BinaryTree.NoValue
         )
-    )
+
+    let mill =
+        BinaryTree.Node(
+            checkPlayerMill,
+            BinaryTree.Node(checkShootingTargetShade, shootExecution, BinaryTree.NoValue),
+            BinaryTree.NoValue
+        )
+
+    let checkMillOrSwitch =
+        BinaryTree.Node(
+            checkPlayerMill,
+            BinaryTree.NoValue,
+            BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue)
+        )
+
+    let place' =
+        BinaryTree.Node(
+            place,
+            BinaryTree.Node(
+                saveAction,
+                BinaryTree.Node(decreaseHand, checkMillOrSwitch, BinaryTree.NoValue),
+                BinaryTree.NoValue
+            ),
+            BinaryTree.NoValue
+        )
+
+    let placeOrMill =
+        BinaryTree.Node(checkPlacingDestination, BinaryTree.Node(checkPlacingHand, place', BinaryTree.NoValue), mill)
+
+    placeOrMill
 
 let initialGame =
     let player = { Shade = Dark; Hand = 12 }
