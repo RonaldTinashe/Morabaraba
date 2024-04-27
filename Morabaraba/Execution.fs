@@ -1,4 +1,4 @@
-module Morabaraba.Executor
+module Morabaraba.Execution
 
 let checkPlacingHand game _ =
     let player = game.Board.Player

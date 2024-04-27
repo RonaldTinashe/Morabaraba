@@ -1,4 +1,4 @@
-module Morabaraba.Executor
+module Morabaraba.Execution
 
 val initialGame: Game
 
