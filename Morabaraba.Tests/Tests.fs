@@ -272,7 +272,7 @@ let ``Player cannot fly with more than three cows on the board`` () =
     |> fun illegalGame -> Assert.Equal(None, illegalGame)
 
 [<Fact>]
-let ``Player cannot create a mill broken to form a new one`` () =
+let ``Restrict broken mill recreation after opponent's non-shot move`` () =
     let movingPlayer = { Shade = Dark; Hand = 0 } // Hand has 0 for moving phase
 
     let breakingMovement =
