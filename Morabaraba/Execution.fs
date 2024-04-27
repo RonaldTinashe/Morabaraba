@@ -1,5 +1,23 @@
 module Morabaraba.Execution
 
+let lines =
+    let flip a b c = a c b
+    let createJunction (letter: char) (number: int) = Junction $"{letter}{number}"
+
+    let sameLetterLines =
+        let numbersLines = [ [ 1; 2; 3 ]; [ 7; 6; 5 ]; [ 1; 8; 7 ]; [ 3; 4; 5 ] ]
+        let letters = [ 'E'; 'A'; 'R' ]
+        List.collect (fun l -> List.map (fun nl -> List.map (createJunction l) nl) numbersLines) letters
+
+    let sameNumberLines =
+        [ 1..8 ]
+        |> List.map (fun number -> List.map ((flip createJunction) number) [ 'E'; 'A'; 'R' ])
+
+    sameLetterLines @ sameNumberLines
+
+let isAMill shade occupants line =
+    List.forall (fun junction -> Map.tryFind junction occupants = Some shade) line
+
 let checkPlacingHand game _ =
     let player = game.Board.Player
     if player.Hand > 0 then Some game else None
@@ -57,27 +75,13 @@ let checkPlayerLastOccupied game _ =
     |> Option.flatten
 
 let checkPlayerMill game _ =
-    let lines =
-        let flip a b c = a c b
-        let createJunction (letter: char) (number: int) = Junction $"{letter}{number}"
+    let shade = game.Board.Player.Shade
+    let occupants = game.Board.Occupants
 
-        let sameLetterLines =
-            let numbersLines = [ [ 1; 2; 3 ]; [ 7; 6; 5 ]; [ 1; 8; 7 ]; [ 3; 4; 5 ] ]
-            let letters = [ 'E'; 'A'; 'R' ]
-            List.collect (fun l -> List.map (fun nl -> List.map (createJunction l) nl) numbersLines) letters
-
-        let sameNumberLines =
-            [ 1..8 ]
-            |> List.map (fun number -> List.map ((flip createJunction) number) [ 'E'; 'A'; 'R' ])
-
-        sameLetterLines @ sameNumberLines
-
-    let isAMill line =
-        let player = game.Board.Player
-        let occupants = game.Board.Occupants
-        List.forall (fun junction -> Map.tryFind junction occupants = Some player.Shade) line
-
-    if List.exists isAMill lines then Some game else None
+    if List.exists (isAMill shade occupants) lines then
+        Some game
+    else
+        None
 
 let checkShootingTargetShade game action =
     let { Board = { Occupants = occupants
@@ -90,28 +94,12 @@ let checkShootingTargetShade game action =
     if isShadeAppropriate then Some game else None
 
 let checkShootingTargetNotInMill game action =
-    let lines =
-        let flip a b c = a c b
-        let createJunction (letter: char) (number: int) = Junction $"{letter}{number}"
-
-        let sameLetterLines =
-            let numbersLines = [ [ 1; 2; 3 ]; [ 7; 6; 5 ]; [ 1; 8; 7 ]; [ 3; 4; 5 ] ]
-            let letters = [ 'E'; 'A'; 'R' ]
-            List.collect (fun l -> List.map (fun nl -> List.map (createJunction l) nl) numbersLines) letters
-
-        let sameNumberLines =
-            [ 1..8 ]
-            |> List.map (fun number -> List.map ((flip createJunction) number) [ 'E'; 'A'; 'R' ])
-
-        sameLetterLines @ sameNumberLines
-
-    let isAMill line =
-        let opponent = game.Board.Opponent
-        let occupants = game.Board.Occupants
-        List.forall (fun junction -> Map.tryFind junction occupants = Some opponent.Shade) line
+    let shade = game.Board.Opponent.Shade
+    let occupants = game.Board.Occupants
 
     let isDestinationInMill =
-        List.filter isAMill lines |> List.exists (List.contains action.Destination)
+        List.filter (isAMill shade occupants) lines
+        |> List.exists (List.contains action.Destination)
 
     if isDestinationInMill then None else Some game
 
