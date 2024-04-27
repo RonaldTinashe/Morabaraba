@@ -103,6 +103,22 @@ let checkShootingTargetNotInMill game action =
 
     if isDestinationInMill then None else Some game
 
+let checkAllOpponentCowsAreInMills game _ =
+    let opponentShade = game.Board.Opponent.Shade
+
+    let opponentOccupants =
+        Map.filter (fun _ shade -> shade = opponentShade) game.Board.Occupants
+
+    let junctionsInOpponentMills =
+        List.filter (isAMill opponentShade opponentOccupants) lines
+        |> List.concat
+        |> List.distinct
+
+    if List.length junctionsInOpponentMills = Map.count opponentOccupants then
+        Some game
+    else
+        None
+
 let shoot game action =
     let updatedOccupants = Map.remove action.Destination game.Board.Occupants
 
@@ -132,7 +148,19 @@ let executorTree =
                     ),
                     BinaryTree.NoValue
                 ),
-                BinaryTree.NoValue
+                BinaryTree.Node(
+                    checkAllOpponentCowsAreInMills,
+                    BinaryTree.Node(
+                        shoot,
+                        BinaryTree.Node(
+                            saveAction,
+                            BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
+                            BinaryTree.NoValue
+                        ),
+                        BinaryTree.NoValue
+                    ),
+                    BinaryTree.NoValue
+                )
             ),
             BinaryTree.NoValue
         )
