@@ -61,28 +61,6 @@ let decreaseHand game _ =
 
     Some { game with Board = updatedBoard }
 
-let checkPlayerLastOccupied game _ =
-    List.tryHead game.History
-    |> Option.map (fun { Destination = d } ->
-        Option.map
-            (fun cowShade ->
-                if game.Board.Player.Shade = cowShade then
-                    Some game
-                else
-                    None)
-            (Map.tryFind d game.Board.Occupants))
-    |> Option.flatten
-    |> Option.flatten
-
-let checkPlayerMill game _ =
-    let shade = game.Board.Player.Shade
-    let occupants = game.Board.Occupants
-
-    if List.exists (isAMill shade occupants) lines then
-        Some game
-    else
-        None
-
 let checkShootingTargetShade game action =
     let { Board = { Occupants = occupants
                     Opponent = opponent } } =
@@ -138,7 +116,6 @@ let checkPlayerMillIsNew game _ =
             None)
     |> Option.flatten
 
-
 let shoot game action =
     let updatedOccupants = Map.remove action.Destination game.Board.Occupants
 
@@ -178,7 +155,7 @@ let executorTree =
 
     let checkMillOrSwitch =
         BinaryTree.Node(
-            checkPlayerMill,
+            checkPlayerMillIsNew,
             BinaryTree.NoValue,
             BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue)
         )
