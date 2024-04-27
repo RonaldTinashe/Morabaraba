@@ -100,7 +100,7 @@ let ``Save action after first action is executed`` () =
 
 [<Fact>]
 let ``Do not switch turns after dark player forms a mill`` () =
-    [ Junction "A1"; Junction "R1"; Junction "A2"; Junction "R2"; Junction "A3" ]
+    [ "A1"; "R1"; "A2"; "R2"; "A3" ]
     |> List.fold
         (fun gameState junction ->
             Option.bind
@@ -108,7 +108,7 @@ let ``Do not switch turns after dark player forms a mill`` () =
                     execute
                         game
                         { Source = None
-                          Destination = junction })
+                          Destination = Junction junction })
                 gameState)
         (Some initialGame)
     |> Option.get
@@ -116,9 +116,9 @@ let ``Do not switch turns after dark player forms a mill`` () =
 
 [<Fact>]
 let ``Allow dark player to remove cow if they have a mill`` () =
-    let target = Junction "R1"
+    let target = "R1"
 
-    [ Junction "A1"; target; Junction "A2"; Junction "R2"; Junction "A3"; target ]
+    [ "A1"; target; "A2"; "R2"; "A3"; target ]
     |> List.fold
         (fun gameState junction ->
             Option.bind
@@ -126,23 +126,17 @@ let ``Allow dark player to remove cow if they have a mill`` () =
                     execute
                         game
                         { Source = None
-                          Destination = junction })
+                          Destination = Junction junction })
                 gameState)
         (Some initialGame)
     |> Option.get
-    |> fun { Board = { Occupants = occupants } } -> Assert.False(Map.containsKey target occupants)
+    |> fun { Board = { Occupants = occupants } } -> Assert.False(Map.containsKey (Junction target) occupants)
 
 [<Fact>]
 let ``Prevent light player from removing light cow`` () =
-    let target = Junction "R1"
+    let target = "R1"
 
-    [ Junction "A1"
-      target
-      Junction "A2"
-      Junction "R2"
-      Junction "E3"
-      Junction "R3"
-      target ]
+    [ "A1"; target; "A2"; "R2"; "E3"; "R3"; target ]
     |> List.fold
         (fun gameState junction ->
             Option.bind
@@ -150,22 +144,16 @@ let ``Prevent light player from removing light cow`` () =
                     execute
                         game
                         { Source = None
-                          Destination = junction })
+                          Destination = Junction junction })
                 gameState)
         (Some initialGame)
     |> fun gameOption -> Assert.Equal(None, gameOption)
 
 [<Fact>]
 let ``Light player cannot shoot an empty junction`` () =
-    let target = Junction "A8"
+    let target = "A8"
 
-    [ Junction "A1"
-      Junction "R1"
-      Junction "A2"
-      Junction "R2"
-      Junction "E3"
-      Junction "R3"
-      target ]
+    [ "A1"; "R1"; "A2"; "R2"; "E3"; "R3"; target ]
     |> List.fold
         (fun gameState junction ->
             Option.bind
@@ -173,24 +161,14 @@ let ``Light player cannot shoot an empty junction`` () =
                     execute
                         game
                         { Source = None
-                          Destination = junction })
+                          Destination = Junction junction })
                 gameState)
         (Some initialGame)
     |> fun gameOption -> Assert.Equal(None, gameOption)
 
 [<Fact>]
 let ``Dark player cannot shoot a light cow in a mill`` () =
-    [ Junction "E1"
-      Junction "R4"
-      Junction "A1"
-      Junction "R1"
-      Junction "A2"
-      Junction "R2"
-      Junction "A8"
-      Junction "R3"
-      Junction "A8"
-      Junction "A3"
-      Junction "R3" ]
+    [ "E1"; "R4"; "A1"; "R1"; "A2"; "R2"; "A8"; "R3"; "A8"; "A3"; "R3" ]
     |> List.fold
         (fun gameState junction ->
             Option.bind
@@ -198,7 +176,7 @@ let ``Dark player cannot shoot a light cow in a mill`` () =
                     execute
                         game
                         { Source = None
-                          Destination = junction })
+                          Destination = Junction junction })
                 gameState)
         (Some initialGame)
     |> fun gameOption -> Assert.Equal(None, gameOption)
