@@ -106,19 +106,16 @@ let saveAction game action =
 let executorTree =
     let shootExecution =
         BinaryTree.Node(
-            shoot,
+            checkShootingTargetShade,
             BinaryTree.Node(
-                saveAction,
-                BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
+                shoot,
+                BinaryTree.Node(
+                    saveAction,
+                    BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
+                    BinaryTree.NoValue
+                ),
                 BinaryTree.NoValue
             ),
-            BinaryTree.NoValue
-        )
-
-    let mill =
-        BinaryTree.Node(
-            checkPlayerMill,
-            BinaryTree.Node(checkShootingTargetShade, shootExecution, BinaryTree.NoValue),
             BinaryTree.NoValue
         )
 
@@ -143,7 +140,7 @@ let executorTree =
     let placeOrMill =
         BinaryTree.Node(
             checkPlayerLastOccupied,
-            mill,
+            shootExecution,
             BinaryTree.Node(
                 checkPlacingDestination,
                 BinaryTree.Node(checkPlacingHand, place', BinaryTree.NoValue),
