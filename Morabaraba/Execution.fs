@@ -192,7 +192,7 @@ let executorTree =
                     place',
                     BinaryTree.Node(
                         move,
-                        BinaryTree.Node(saveAction, BinaryTree.NoValue, BinaryTree.NoValue),
+                        BinaryTree.Node(saveAction, checkMillOrSwitch, BinaryTree.NoValue),
                         BinaryTree.NoValue
                     )
                 ),

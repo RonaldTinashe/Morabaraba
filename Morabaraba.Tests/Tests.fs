@@ -253,3 +253,9 @@ let ``Movements are saved`` () =
                   Destination = Junction "E4" },
             action
         )
+
+[<Fact>]
+let ``After dark player moves cow and does not form a mill, the next player is light`` () =
+    match gameAfterMovementSimulation with
+    | Some { Board = { Player = { Shade = s } } } -> Assert.Equal(Light, s)
+    | None -> Assert.Fail(sprintf "Failed to move cow. Current game state is %A" gameAfterMovementSimulation)
