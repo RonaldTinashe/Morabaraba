@@ -242,3 +242,35 @@ let ``Movement removes source junction occupant, placing them on the destination
         let sourceJunctionOccupant = Map.tryFind (Junction "A4") o
         let destinationJunctionOccupant = Map.tryFind (Junction "E4") o
         Assert.Equal((None, Some Dark), (sourceJunctionOccupant, destinationJunctionOccupant))
+
+[<Fact>]
+let ``Movements are saved`` () =
+    [ "A1"; "R1"; "A2"; "R2"; "A3"; "R2"; "R2"; "A4"; "R3"; "A4"; "A4"; "R4" ]
+    |> List.fold
+        (fun gameState junction ->
+            Option.bind
+                (fun game ->
+                    execute
+                        game
+                        { Source = None
+                          Destination = Junction junction })
+                gameState)
+        (Some initialGame)
+    |> Option.map (fun game ->
+        { game with
+            Board =
+                { game.Board with
+                    Player = { game.Board.Player with Hand = 0 } } })
+    |> Option.bind (fun game ->
+        execute
+            game
+            { Source = Some(Junction "A4")
+              Destination = Junction "E4" })
+    |> Option.bind (fun { History = h } -> List.tryHead h)
+    |> fun action ->
+        Assert.Equal(
+            Some
+                { Source = Some(Junction "A4")
+                  Destination = Junction "E4" },
+            action
+        )

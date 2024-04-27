@@ -187,7 +187,15 @@ let executorTree =
             shoot',
             BinaryTree.Node(
                 checkPlacingDestination,
-                BinaryTree.Node(checkPlacingHand, place', BinaryTree.Node(move, BinaryTree.NoValue, BinaryTree.NoValue)),
+                BinaryTree.Node(
+                    checkPlacingHand,
+                    place',
+                    BinaryTree.Node(
+                        move,
+                        BinaryTree.Node(saveAction, BinaryTree.NoValue, BinaryTree.NoValue),
+                        BinaryTree.NoValue
+                    )
+                ),
                 BinaryTree.NoValue
             )
         )
