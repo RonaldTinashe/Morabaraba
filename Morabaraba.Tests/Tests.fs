@@ -179,8 +179,10 @@ let ``Light player cannot shoot an empty junction`` () =
     |> fun gameOption -> Assert.Equal(None, gameOption)
 
 [<Fact>]
-let ``Dark player cannot shoot a dark cow in a mill`` () =
-    [ Junction "A1"
+let ``Dark player cannot shoot a light cow in a mill`` () =
+    [ Junction "E1"
+      Junction "R4"
+      Junction "A1"
       Junction "R1"
       Junction "A2"
       Junction "R2"
