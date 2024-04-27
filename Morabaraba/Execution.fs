@@ -1,5 +1,6 @@
 module Morabaraba.Execution
 
+// Helpers
 let lines =
     let flip a b c = a c b
     let createJunction (letter: char) (number: int) = Junction $"{letter}{number}"
@@ -18,6 +19,17 @@ let lines =
 let isAMill shade occupants line =
     List.forall (fun junction -> Map.tryFind junction occupants = Some shade) line
 
+let occupantsByShade competitorShade occupants =
+    Map.filter (fun _ shade -> shade = competitorShade) occupants
+
+let junctionsInMillsByShade competitorShade occupants =
+    let competitorOccupants = occupantsByShade competitorShade occupants
+
+    List.filter (isAMill competitorShade competitorOccupants) lines
+    |> List.concat
+    |> List.distinct
+
+// Executors
 let checkPlacingHand game _ =
     let player = game.Board.Player
     if player.Hand > 0 then Some game else None
@@ -83,14 +95,10 @@ let checkShootingTargetNotInMill game action =
 
 let checkAllOpponentCowsAreInMills game _ =
     let opponentShade = game.Board.Opponent.Shade
-
-    let opponentOccupants =
-        Map.filter (fun _ shade -> shade = opponentShade) game.Board.Occupants
+    let opponentOccupants = occupantsByShade opponentShade game.Board.Occupants
 
     let junctionsInOpponentMills =
-        List.filter (isAMill opponentShade opponentOccupants) lines
-        |> List.concat
-        |> List.distinct
+        junctionsInMillsByShade opponentShade game.Board.Occupants
 
     if List.length junctionsInOpponentMills = Map.count opponentOccupants then
         Some game
@@ -98,15 +106,8 @@ let checkAllOpponentCowsAreInMills game _ =
         None
 
 let checkPlayerMillIsNew game _ =
-    let playerShade = game.Board.Player.Shade
-
-    let playerOccupants =
-        Map.filter (fun _ shade -> shade = playerShade) game.Board.Occupants
-
     let junctionsInPlayerMills =
-        List.filter (isAMill playerShade playerOccupants) lines
-        |> List.concat
-        |> List.distinct
+        junctionsInMillsByShade game.Board.Player.Shade game.Board.Occupants
 
     List.tryHead game.History
     |> Option.map (fun { Destination = d } ->
