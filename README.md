@@ -3,7 +3,6 @@
 ## TODO
 
 ### Rules to Implement
-- Movement of cows from one neighbour to another
 - A mill broken to create another may not be recreated by moving the breaking cow back to its original junction
 - Fly
 - Winning on impossible movement for opponent
