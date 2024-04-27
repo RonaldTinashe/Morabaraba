@@ -136,31 +136,22 @@ let saveAction game action =
 let executorTree =
     let shootExecution =
         BinaryTree.Node(
+            shoot,
+            BinaryTree.Node(
+                saveAction,
+                BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
+                BinaryTree.NoValue
+            ),
+            BinaryTree.NoValue
+        )
+
+    let shoot' =
+        BinaryTree.Node(
             checkShootingTargetShade,
             BinaryTree.Node(
                 checkShootingTargetNotInMill,
-                BinaryTree.Node(
-                    shoot,
-                    BinaryTree.Node(
-                        saveAction,
-                        BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
-                        BinaryTree.NoValue
-                    ),
-                    BinaryTree.NoValue
-                ),
-                BinaryTree.Node(
-                    checkAllOpponentCowsAreInMills,
-                    BinaryTree.Node(
-                        shoot,
-                        BinaryTree.Node(
-                            saveAction,
-                            BinaryTree.Node(switchTurns, BinaryTree.NoValue, BinaryTree.NoValue),
-                            BinaryTree.NoValue
-                        ),
-                        BinaryTree.NoValue
-                    ),
-                    BinaryTree.NoValue
-                )
+                shootExecution,
+                BinaryTree.Node(checkAllOpponentCowsAreInMills, shootExecution, BinaryTree.NoValue)
             ),
             BinaryTree.NoValue
         )
@@ -186,7 +177,7 @@ let executorTree =
     let placeOrMill =
         BinaryTree.Node(
             checkPlayerLastOccupied,
-            shootExecution,
+            shoot',
             BinaryTree.Node(
                 checkPlacingDestination,
                 BinaryTree.Node(checkPlacingHand, place', BinaryTree.NoValue),
