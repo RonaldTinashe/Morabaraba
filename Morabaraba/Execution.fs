@@ -275,4 +275,9 @@ let execute board action =
     let executionFolder boardOption ruleExecution =
         Option.bind (fun boardValue -> ruleExecution boardValue action) boardOption
 
-    BinaryTree.fold executionFolder Option.isSome (Some board) executorTree
+    let boardAfterExecution =
+        BinaryTree.fold executionFolder Option.isSome (Some board) executorTree
+
+    match boardAfterExecution with
+    | Some b -> b
+    | None -> { board with Status = Lost }

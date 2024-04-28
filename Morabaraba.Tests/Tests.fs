@@ -31,7 +31,7 @@ let ``Initial player occupies A1`` () =
         { Source = None
           Destination = Junction "A1" }
 
-    let board = execute initialBoard action |> Option.get
+    let board = execute initialBoard action
     let occupants = board.Occupants
     Assert.Equal(Dark, occupants.[Junction "A1"])
 
@@ -41,7 +41,7 @@ let ``Player is light after initial player has occupied A1`` () =
         { Source = None
           Destination = Junction "A1" }
 
-    let board = execute initialBoard action |> Option.get
+    let board = execute initialBoard action
     Assert.Equal(Light, board.Player.Shade)
 
 [<Fact>]
@@ -50,7 +50,7 @@ let ``Initial dark competitor should have 11 cows after occupying A1`` () =
         { Source = None
           Destination = Junction "A1" }
 
-    let board = execute initialBoard action |> Option.get
+    let board = execute initialBoard action
     Assert.Equal(11, board.Opponent.Hand)
 
 [<Fact>]
@@ -70,7 +70,8 @@ let ``Light player cannot place with an empty hand`` () =
           History = []
           Status = Playing }
 
-    Assert.Equal(None, execute board action)
+    let board = execute board action
+    Assert.Equal(Lost, board.Status)
 
 [<Fact>]
 let ``Light player cannot place on E1 if E1 is occupied`` () =
@@ -88,7 +89,8 @@ let ``Light player cannot place on E1 if E1 is occupied`` () =
           History = []
           Status = Playing }
 
-    Assert.Equal(None, execute board action)
+    let board = execute board action
+    Assert.Equal(Lost, board.Status)
 
 [<Fact>]
 let ``Save action after first action is executed`` () =
@@ -96,23 +98,19 @@ let ``Save action after first action is executed`` () =
         { Source = None
           Destination = Junction "A1" }
 
-    let board = execute initialBoard action |> Option.get
+    let board = execute initialBoard action
     Assert.Equal<list<Action>>([ action ], board.History)
 
 [<Fact>]
 let ``Do not switch turns after dark player forms a mill`` () =
     [ "A1"; "R1"; "A2"; "R2"; "A3" ]
     |> List.fold
-        (fun boardState junction ->
-            Option.bind
-                (fun board ->
-                    execute
-                        board
-                        { Source = None
-                          Destination = Junction junction })
-                boardState)
-        (Some initialBoard)
-    |> Option.get
+        (fun board junction ->
+            execute
+                board
+                { Source = None
+                  Destination = Junction junction })
+        initialBoard
     |> fun { Player = player } -> Assert.Equal(Dark, player.Shade)
 
 [<Fact>]
@@ -121,16 +119,12 @@ let ``Allow dark player to remove cow if they have a mill`` () =
 
     [ "A1"; target; "A2"; "R2"; "A3"; target ]
     |> List.fold
-        (fun boardState junction ->
-            Option.bind
-                (fun board ->
-                    execute
-                        board
-                        { Source = None
-                          Destination = Junction junction })
-                boardState)
-        (Some initialBoard)
-    |> Option.get
+        (fun board junction ->
+            execute
+                board
+                { Source = None
+                  Destination = Junction junction })
+        initialBoard
     |> fun { Occupants = occupants } -> Assert.False(Map.containsKey (Junction target) occupants)
 
 [<Fact>]
@@ -139,16 +133,13 @@ let ``Prevent light player from removing light cow`` () =
 
     [ "A1"; target; "A2"; "R2"; "E3"; "R3"; target ]
     |> List.fold
-        (fun boardState junction ->
-            Option.bind
-                (fun board ->
-                    execute
-                        board
-                        { Source = None
-                          Destination = Junction junction })
-                boardState)
-        (Some initialBoard)
-    |> fun boardOption -> Assert.Equal(None, boardOption)
+        (fun board junction ->
+            execute
+                board
+                { Source = None
+                  Destination = Junction junction })
+        initialBoard
+    |> fun board -> Assert.Equal(Lost, board.Status)
 
 [<Fact>]
 let ``Light player cannot shoot an empty junction`` () =
@@ -156,61 +147,57 @@ let ``Light player cannot shoot an empty junction`` () =
 
     [ "A1"; "R1"; "A2"; "R2"; "E3"; "R3"; target ]
     |> List.fold
-        (fun boardState junction ->
-            Option.bind
-                (fun board ->
-                    execute
-                        board
-                        { Source = None
-                          Destination = Junction junction })
-                boardState)
-        (Some initialBoard)
-    |> fun boardOption -> Assert.Equal(None, boardOption)
+        (fun board junction ->
+            execute
+                board
+                { Source = None
+                  Destination = Junction junction })
+        initialBoard
+    |> fun board -> Assert.Equal(Lost, board.Status)
 
 [<Fact>]
 let ``Dark player cannot shoot a light cow in a mill`` () =
     [ "E1"; "R4"; "A1"; "R1"; "A2"; "R2"; "A8"; "R3"; "A8"; "A3"; "R3" ]
     |> List.fold
-        (fun boardState junction ->
-            Option.bind
-                (fun board ->
-                    execute
-                        board
-                        { Source = None
-                          Destination = Junction junction })
-                boardState)
-        (Some initialBoard)
-    |> fun boardOption -> Assert.Equal(None, boardOption)
+        (fun board junction ->
+            execute
+                board
+                { Source = None
+                  Destination = Junction junction })
+        initialBoard
+    |> fun board -> Assert.Equal(Lost, board.Status)
 
 [<Fact>]
 let ``Dark player can shoot a light cow if all light cows are in a mill`` () =
-    [ "A1"; "R1"; "A2"; "R2"; "A8"; "R3"; "A8"; "A3"; "R3" ]
+    [ "A1" // Dark places
+      "R1" // Light places
+      "A2" // Dark places
+      "R2" // Light places
+      "A8" // Dark places
+      "R3" // Light places forming a mill
+      "A8" // Light shoots Dark
+      "A3" // Dark places forming a mill
+      "R3" ] // Dark shoots Light in a mill
     |> List.fold
-        (fun boardState junction ->
-            Option.bind
-                (fun board ->
-                    execute
-                        board
-                        { Source = None
-                          Destination = Junction junction })
-                boardState)
-        (Some initialBoard)
-    |> fun boardOption -> Assert.NotEqual(None, boardOption)
+        (fun board junction ->
+            execute
+                board
+                { Source = None
+                  Destination = Junction junction })
+        initialBoard
+    |> fun board -> Assert.Equal(Playing, board.Status)
 
 [<Fact>]
 let ``Dark player can only shoot with a newly formed mill`` () =
-    [ "A1"; "R1"; "A2"; "R2"; "A3"; "R2"; "R2"; "A4"; "R2" ] // Mill "A1;A2;A3" cannot be reused
+    [ "A1"; "R1"; "A2"; "R2"; "A3"; "R2"; "R2"; "A4" ] // Mill "A1;A2;A3" cannot be reused
     |> List.fold
-        (fun boardState junction ->
-            Option.bind
-                (fun board ->
-                    execute
-                        board
-                        { Source = None
-                          Destination = Junction junction })
-                boardState)
-        (Some initialBoard)
-    |> fun boardOption -> Assert.Equal(None, boardOption)
+        (fun board junction ->
+            execute
+                board
+                { Source = None
+                  Destination = Junction junction })
+        initialBoard
+    |> fun board -> Assert.Equal(Light, board.Player.Shade)
 
 let boardAfterMovementSimulation =
     [ "A1" // Dark places
@@ -226,37 +213,35 @@ let boardAfterMovementSimulation =
       "A4" // Dark replaces shot cow
       "R4" ] // Light places
     |> List.fold
-        (fun boardState junction ->
-            Option.bind
-                (fun board ->
-                    execute
-                        board
-                        { Source = None
-                          Destination = Junction junction })
-                boardState)
-        (Some initialBoard)
-    |> Option.map (fun board ->
+        (fun board junction ->
+            execute
+                board
+                { Source = None
+                  Destination = Junction junction })
+        initialBoard
+    |> fun board ->
         { board with
             Player = { board.Player with Hand = 0 }
-            Opponent = { board.Opponent with Hand = 0 } })
-    |> Option.bind (fun board ->
+            Opponent = { board.Opponent with Hand = 0 } }
+    |> fun board ->
         execute
             board
             { Source = Some(Junction "A4")
-              Destination = Junction "E4" })
+              Destination = Junction "E4" }
 
 [<Fact>]
 let ``Movement removes source junction occupant, placing them on the destination`` () =
-    match boardAfterMovementSimulation with
-    | None -> Assert.Fail(sprintf "Failed to move cow. Current board state is %A" boardAfterMovementSimulation)
-    | Some { Occupants = o } ->
-        let sourceJunctionOccupant = Map.tryFind (Junction "A4") o
-        let destinationJunctionOccupant = Map.tryFind (Junction "E4") o
-        Assert.Equal((None, Some Dark), (sourceJunctionOccupant, destinationJunctionOccupant))
+    let sourceJunctionOccupant =
+        Map.tryFind (Junction "A4") boardAfterMovementSimulation.Occupants
+
+    let destinationJunctionOccupant =
+        Map.tryFind (Junction "E4") boardAfterMovementSimulation.Occupants
+
+    Assert.Equal((None, Some Dark), (sourceJunctionOccupant, destinationJunctionOccupant))
 
 [<Fact>]
 let ``Movements are saved`` () =
-    Option.bind (fun { History = h } -> List.tryHead h) boardAfterMovementSimulation
+    List.tryHead boardAfterMovementSimulation.History
     |> fun action ->
         Assert.Equal(
             Some
@@ -267,19 +252,15 @@ let ``Movements are saved`` () =
 
 [<Fact>]
 let ``After dark player moves cow and does not form a mill, the next player is light`` () =
-    match boardAfterMovementSimulation with
-    | Some { Player = { Shade = s } } -> Assert.Equal(Light, s)
-    | None -> Assert.Fail(sprintf "Failed to move cow. Current board state is %A" boardAfterMovementSimulation)
+    Assert.Equal(Light, boardAfterMovementSimulation.Player.Shade)
 
 [<Fact>]
 let ``Player cannot fly with more than three cows on the board`` () =
-    boardAfterMovementSimulation
-    |> Option.bind (fun board ->
-        execute
-            board
-            { Source = Some(Junction "R1")
-              Destination = Junction "R7" })
-    |> fun illegalBoard -> Assert.Equal(None, illegalBoard)
+    execute
+        boardAfterMovementSimulation
+        { Source = Some(Junction "R1")
+          Destination = Junction "R7" }
+    |> fun board -> Assert.Equal(Lost, board.Status)
 
 [<Fact>]
 let ``Restrict broken mill recreation after opponent's non-shot action`` () =
@@ -305,27 +286,27 @@ let ``Restrict broken mill recreation after opponent's non-shot action`` () =
       "E1" // Dark shoots Light
       "E1" ] // Light replaces shot cow
     |> List.fold
-        (fun boardState junction ->
+        (fun board junction ->
             let action =
                 { Source = None
                   Destination = Junction junction }
 
-            Option.bind (fun board -> execute board action) boardState)
-        (Some initialBoard)
-    |> Option.map (fun board -> { board with Player = movingPlayer })
-    |> Option.bind (fun board -> execute board breakingMovement) // break mill
-    |> Option.bind (fun board ->
+            execute board action)
+        initialBoard
+    |> fun board -> { board with Player = movingPlayer }
+    |> fun board -> execute board breakingMovement // break mill
+    |> fun board ->
         execute
             board
             { Source = None
-              Destination = Junction "E1" }) // Dark shoots Light
-    |> Option.bind (fun board ->
+              Destination = Junction "E1" } // Dark shoots Light
+    |> fun board ->
         execute
             board
             { Source = None
-              Destination = Junction "E1" }) // Light places
-    |> Option.bind (fun board -> execute board illegalMovement)
-    |> fun board -> Assert.Equal(None, board)
+              Destination = Junction "E1" } // Light places
+    |> fun board -> execute board illegalMovement
+    |> fun board -> Assert.Equal(Lost, board.Status)
 
 [<Fact>]
 let ``Restrict broken mill recreation after opponent's shot action`` () =
@@ -353,33 +334,32 @@ let ``Restrict broken mill recreation after opponent's shot action`` () =
       "E1" // Dark shoots Light
       "E1" ] // Light replaces shot cow
     |> List.fold
-        (fun boardState junction ->
+        (fun board junction ->
             let action =
                 { Source = None
                   Destination = Junction junction }
 
-            Option.bind (fun board -> execute board action) boardState)
-        (Some initialBoard)
-    |> Option.map (fun board -> { board with Player = movingPlayer })
-    |> Option.bind (fun board -> execute board breakingMovement) // break mill
-    |> Option.bind (fun board ->
-
+            execute board action)
+        initialBoard
+    |> fun board -> { board with Player = movingPlayer }
+    |> fun board -> execute board breakingMovement // break mill
+    |> fun board ->
         execute
             board
             { Source = None
-              Destination = Junction "E1" }) // Dark shoots Light
-    |> Option.bind (fun board ->
+              Destination = Junction "E1" } // Dark shoots Light
+    |> fun board ->
         execute
             board
             { Source = None
-              Destination = Junction "A2" }) // Light places
-    |> Option.bind (fun board ->
+              Destination = Junction "A2" } // Light places
+    |> fun board ->
         execute
             board
             { Source = None
-              Destination = Junction "R4" }) // Light shoots
-    |> Option.bind (fun board -> execute board illegalMovement)
-    |> fun board -> Assert.Equal(None, board)
+              Destination = Junction "R4" } // Light shoots
+    |> fun board -> execute board illegalMovement
+    |> fun board -> Assert.Equal(Lost, board.Status)
 
 [<Fact>]
 let ``Player with three cows on the board and an empty hand can fly`` () =
@@ -401,8 +381,8 @@ let ``Player with three cows on the board and an empty hand can fly`` () =
           Occupants = occupants
           Status = Playing }
 
-    let boardAfterExecution = execute board movement
-    Assert.NotEqual(None, boardAfterExecution)
+    let board = execute board movement
+    Assert.Equal(Playing, board.Status)
 
 [<Fact>]
 let ``Disallow placement on non-existent junctions`` () =
