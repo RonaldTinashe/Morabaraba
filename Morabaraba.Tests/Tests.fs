@@ -60,7 +60,7 @@ let ``Light player cannot place with an empty hand`` () =
           Destination = Junction "A1" }
 
     let player = { Shade = Light; Hand = 0 }
-    let occupants = List.init 5 (fun i -> Junction $"E{i}", Light) |> Map
+    let occupants = List.init 5 (fun i -> Junction $"E{i + 1}", Light) |> Map
 
     let board =
 
@@ -78,7 +78,7 @@ let ``Light player cannot place on E1 if E1 is occupied`` () =
           Destination = Junction "E1" }
 
     let player = { Shade = Light; Hand = 7 }
-    let occupants = List.init 5 (fun i -> Junction $"E{i}", Dark) |> Map
+    let occupants = List.init 5 (fun i -> Junction $"E{i + 1}", Dark) |> Map
 
     let board =
         { Occupants = occupants
@@ -400,3 +400,8 @@ let ``Player with three cows on the board and an empty hand can fly`` () =
 
     let boardAfterExecution = execute board movement
     Assert.NotEqual(None, boardAfterExecution)
+
+[<Fact>]
+let ``Disallow placement on non-existent junctions`` () =
+    let createIllegalJunction = System.Action(fun () -> ignore <| Junction "X9")
+    Assert.Throws<ArgumentException>(createIllegalJunction)
