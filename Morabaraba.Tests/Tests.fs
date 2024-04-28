@@ -385,6 +385,6 @@ let ``Player with three cows on the board and an empty hand can fly`` () =
     Assert.Equal(Playing, board.Status)
 
 [<Fact>]
-let ``Disallow placement on non-existent junctions`` () =
+let ``Disallow non-existent junctions`` () =
     let createIllegalJunction = System.Action(fun () -> ignore <| Junction "X9")
     Assert.Throws<ArgumentException>(createIllegalJunction)
