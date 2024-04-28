@@ -267,7 +267,8 @@ let initialBoard =
     { Player = player
       Opponent = opponent
       Occupants = Map.empty
-      History = [] }
+      History = []
+      Status = Playing }
 
 let execute board action =
 

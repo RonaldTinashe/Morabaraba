@@ -67,7 +67,8 @@ let ``Light player cannot place with an empty hand`` () =
         { Occupants = occupants
           Player = player
           Opponent = { player with Shade = Dark }
-          History = [] }
+          History = []
+          Status = Playing }
 
     Assert.Equal(None, execute board action)
 
@@ -84,7 +85,8 @@ let ``Light player cannot place on E1 if E1 is occupied`` () =
         { Occupants = occupants
           Player = player
           Opponent = { player with Shade = Dark }
-          History = [] }
+          History = []
+          Status = Playing }
 
     Assert.Equal(None, execute board action)
 
@@ -396,7 +398,8 @@ let ``Player with three cows on the board and an empty hand can fly`` () =
         { Player = player
           Opponent = { player with Shade = Light }
           History = []
-          Occupants = occupants }
+          Occupants = occupants
+          Status = Playing }
 
     let boardAfterExecution = execute board movement
     Assert.NotEqual(None, boardAfterExecution)

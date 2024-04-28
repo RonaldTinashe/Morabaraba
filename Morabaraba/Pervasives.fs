@@ -29,8 +29,15 @@ type Action =
     { Source: option<Junction>
       Destination: Junction }
 
+type Status =
+    | Won
+    | Lost
+    | Drew
+    | Playing
+
 type Board =
     { Player: Competitor
       Opponent: Competitor
       Occupants: Map<Junction, Shade>
-      History: list<Action> }
+      History: list<Action>
+      Status: Status }
