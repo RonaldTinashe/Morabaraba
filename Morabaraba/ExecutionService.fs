@@ -19,7 +19,7 @@ let execute board action =
         Option.bind (fun boardValue -> ruleExecution boardValue action) boardOption
 
     let boardAfterExecution =
-        BinaryTree.fold executionFolder Option.isSome (Some board) executorTree
+        BinaryTree.fold executionFolder Option.isSome (Some board) root
 
     match boardAfterExecution with
     | Some b -> b

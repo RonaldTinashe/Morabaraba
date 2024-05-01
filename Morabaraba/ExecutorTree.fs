@@ -172,7 +172,7 @@ let winIfNoMovesForOpponent board _ =
     else
         None
 
-let executorTree =
+let root =
     let shootExecution =
         BinaryTree.Node(
             shoot,

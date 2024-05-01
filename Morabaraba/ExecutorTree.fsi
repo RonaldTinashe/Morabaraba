@@ -1,3 +1,3 @@
 module Morabaraba.ExecutorTree
 
-val executorTree: BinaryTree.Node<Board -> Action -> option<Board>>
+val root: BinaryTree.Node<Board -> Action -> option<Board>>
