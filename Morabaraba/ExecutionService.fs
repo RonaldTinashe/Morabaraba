@@ -1,4 +1,4 @@
-module Morabaraba.Execution
+module Morabaraba.ExecutionService
 
 open Morabaraba
 open OccupationService

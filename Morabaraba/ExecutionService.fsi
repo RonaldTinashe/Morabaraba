@@ -1,4 +1,4 @@
-module Morabaraba.Execution
+module Morabaraba.ExecutionService
 
 val initialBoard: Board
 
