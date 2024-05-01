@@ -389,17 +389,21 @@ let ``Disallow non-existent junctions`` () =
     let createIllegalJunction = System.Action(fun () -> ignore <| Junction "X9")
     Assert.Throws<ArgumentException>(createIllegalJunction)
 
+let massOccupy darkJunctions lightJunctions =
+    let occupy shade coordinate = Junction coordinate, shade
+    let darkOccupants = List.map (occupy Dark) darkJunctions
+    let lightOccupants = List.map (occupy Light) lightJunctions
+    darkOccupants @ lightOccupants |> Map
+
 [<Fact>]
 let ``Player wins if the opponent has no moves left`` () =
-    let darkOccupants =
-        [ "E1"; "E3"; "E7"; "E5" ] |> List.map (fun junction -> Junction junction, Dark)
+    let darkJunctions = [ "E1"; "E3"; "E7"; "E5" ]
 
-    let lightOccupants =
+    let lightJunctions =
         // R5 will be moved to A5 in the turn
         [ "E2"; "E8"; "E6"; "E4"; "A1"; "A3"; "A7"; "R5" ]
-        |> List.map (fun junction -> Junction junction, Light)
 
-    let occupants = darkOccupants @ lightOccupants |> Map
+    let occupants = massOccupy darkJunctions lightJunctions
     let darkCompetitor = { Shade = Dark; Hand = 0 }
     let lightCompetitor = { darkCompetitor with Shade = Light }
 
@@ -418,13 +422,11 @@ let ``Player wins if the opponent has no moves left`` () =
 
 [<Fact>]
 let ``Player wins if the opponent has two cows left`` () =
-    let darkOccupants =
-        List.map (fun junction -> Junction junction, Dark) [ "A1"; "A2"; "A3" ]
+    let darkJunctions = [ "A1"; "A2"; "A3" ]
 
-    let lightOccupants =
-        List.map (fun junction -> Junction junction, Light) [ "R2"; "R3"; "R8" ]
+    let lightJunctions = [ "R2"; "R3"; "R8" ]
 
-    let occupants = darkOccupants @ lightOccupants |> Map
+    let occupants = massOccupy darkJunctions lightJunctions
     let darkCompetitor = { Shade = Dark; Hand = 0 }
     let lightCompetitor = { darkCompetitor with Shade = Light }
 
