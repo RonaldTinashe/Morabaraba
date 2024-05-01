@@ -8,6 +8,7 @@
     <Compile Include="Pervasives.fs" />
     <Compile Include="OccupationService.fs" />
     <Compile Include="ExecutorCollection.fs" />
+    <Compile Include="ExecutorTree.fsi" />
     <Compile Include="ExecutorTree.fs" />
     <Compile Include="ExecutionService.fsi" />
     <Compile Include="ExecutionService.fs" />
