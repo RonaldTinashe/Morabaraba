@@ -1,6 +1,4 @@
 # Morabaraba
 
 ## TODO
-
-### Rules to Implement
-- Draw when a player has three cows remaining and no shot has been made in the past ten moves
+- Reefacor Morabaraba to a classlib that can be reused for a Fable app and a console app
