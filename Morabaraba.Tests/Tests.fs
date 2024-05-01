@@ -388,3 +388,30 @@ let ``Player with three cows on the board and an empty hand can fly`` () =
 let ``Disallow non-existent junctions`` () =
     let createIllegalJunction = System.Action(fun () -> ignore <| Junction "X9")
     Assert.Throws<ArgumentException>(createIllegalJunction)
+
+[<Fact>]
+let ``Player wins if the opponent has no moves left`` () =
+    let darkOccupants =
+        [ "E1"; "E3"; "E7"; "E5" ] |> List.map (fun junction -> Junction junction, Dark)
+
+    let lightOccupants =
+        // R5 will be moved to A5 in the turn
+        [ "E2"; "E8"; "E6"; "E4"; "A1"; "A3"; "A7"; "R5" ]
+        |> List.map (fun junction -> Junction junction, Light)
+
+    let occupants = darkOccupants @ lightOccupants |> Map
+    let darkCompetitor = { Shade = Dark; Hand = 0 }
+    let lightCompetitor = { darkCompetitor with Shade = Light }
+
+    let board =
+        { initialBoard with
+            Occupants = occupants
+            Player = lightCompetitor
+            Opponent = darkCompetitor }
+
+    let action =
+        { Source = Some(Junction "R5")
+          Destination = Junction "A5" }
+
+    let board = execute board action
+    Assert.Equal((Light, Won), (board.Player.Shade, board.Status))

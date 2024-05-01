@@ -18,6 +18,25 @@ let lines =
 
     sameLetterLines @ sameNumberLines
 
+let neighbours =
+    let sameLetterNeighbours =
+        let numbers = [ 1, 2; 2, 3; 7, 6; 6, 5; 1, 8; 8, 7; 3, 4; 4, 5 ]
+        let letters = [ 'E'; 'A'; 'R' ]
+
+        List.collect
+            (fun letter -> List.map (fun (n1, n2) -> (createJunction letter n1), (createJunction letter n2)) numbers)
+            letters
+
+    let sameNumberNeigbours =
+        let letterNeighbours = [ 'E', 'A'; 'A', 'R' ]
+
+        List.collect
+            (fun (letter1, letter2) ->
+                List.map (fun n -> (createJunction letter1 n), (createJunction letter2 n)) boardNumbers)
+            letterNeighbours
+
+    sameLetterNeighbours @ sameNumberNeigbours
+
 let isAMill shade occupants line =
     List.forall (fun junction -> Map.tryFind junction occupants = Some shade) line
 
@@ -113,24 +132,6 @@ let shoot board action =
             Occupants = updatedOccupants }
 
 let checkMovingJunctions board action =
-    let sameLetterNeighbours =
-        let numbers = [ 1, 2; 2, 3; 7, 6; 6, 5; 1, 8; 8, 7; 3, 4; 4, 5 ]
-        let letters = [ 'E'; 'A'; 'R' ]
-
-        List.collect
-            (fun letter -> List.map (fun (n1, n2) -> (createJunction letter n1), (createJunction letter n2)) numbers)
-            letters
-
-    let sameNumberNeigbours =
-        let letterNeighbours = [ 'E', 'A'; 'A', 'R' ]
-
-        List.collect
-            (fun (letter1, letter2) ->
-                List.map (fun n -> (createJunction letter1 n), (createJunction letter2 n)) boardNumbers)
-            letterNeighbours
-
-    let neighbours = sameLetterNeighbours @ sameNumberNeigbours
-
     let areJunctionsNeighbours =
         match action.Source with
         | Some source ->
@@ -196,6 +197,29 @@ let saveAction board action =
         { board with
             History = action :: board.History }
 
+let winIfNoMovesForOpponent board _ =
+    let opponentJunctions =
+        occupantsByShade board.Opponent.Shade board.Occupants |> Map.keys |> List.ofSeq
+
+    let neighbourOfOccupant occupantJunction (junction1, junction2) =
+        if junction1 = occupantJunction then Some junction2
+        else if junction2 = occupantJunction then Some junction1
+        else None
+
+    let neighboursOfOccupant occupantJunction =
+        List.map (neighbourOfOccupant occupantJunction) neighbours
+        |> List.filter Option.isSome
+        |> List.map Option.get
+
+    let areAllNeighboursOccupied =
+        List.collect neighboursOfOccupant opponentJunctions
+        |> List.forall (fun junction -> Map.containsKey junction board.Occupants)
+
+    if areAllNeighboursOccupied then
+        Some { board with Status = Won }
+    else
+        None
+
 let executorTree =
     let shootExecution =
         BinaryTree.Node(
@@ -238,7 +262,15 @@ let executorTree =
         )
 
     let moveExecution =
-        BinaryTree.Node(move, BinaryTree.Node(saveAction, checkMillOrSwitch, BinaryTree.NoValue), BinaryTree.NoValue)
+        BinaryTree.Node(
+            move,
+            BinaryTree.Node(
+                winIfNoMovesForOpponent,
+                BinaryTree.Node(saveAction, BinaryTree.NoValue, BinaryTree.NoValue),
+                BinaryTree.Node(saveAction, checkMillOrSwitch, BinaryTree.NoValue)
+            ),
+            BinaryTree.NoValue
+        )
 
     let move' =
         BinaryTree.Node(
