@@ -3,11 +3,11 @@ module BinaryTree
 
 type Node<'T> =
     | Node of value: 'T * left: Node<'T> * right: Node<'T>
-    | NoValue
+    | Empty
 
 let rec fold folder shouldSelectLeft state tree =
     match tree with
-    | NoValue -> state
+    | Empty -> state
     | Node(value, left, right) ->
         let state2 = folder state value
 
@@ -16,7 +16,7 @@ let rec fold folder shouldSelectLeft state tree =
             state3
         else
             match right with
-            | NoValue -> state2
+            | Empty -> state2
             | Node _ ->
                 let state4 = fold folder shouldSelectLeft state right
                 state4
