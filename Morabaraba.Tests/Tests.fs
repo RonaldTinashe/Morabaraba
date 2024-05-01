@@ -415,3 +415,33 @@ let ``Player wins if the opponent has no moves left`` () =
 
     let board = execute board action
     Assert.Equal((Light, Won), (board.Player.Shade, board.Status))
+
+[<Fact>]
+let ``Player wins if the opponent has two cows left`` () =
+    let darkOccupants =
+        List.map (fun junction -> Junction junction, Dark) [ "A1"; "A2"; "A3" ]
+
+    let lightOccupants =
+        List.map (fun junction -> Junction junction, Light) [ "R2"; "R3"; "R8" ]
+
+    let occupants = darkOccupants @ lightOccupants |> Map
+    let darkCompetitor = { Shade = Dark; Hand = 0 }
+    let lightCompetitor = { darkCompetitor with Shade = Light }
+
+    let millFormingAction =
+        { Source = Some(Junction "R8")
+          Destination = Junction "R1" }
+
+    let shotAction =
+        { Source = None
+          Destination = Junction "A1" }
+
+    let board =
+        { initialBoard with
+            Occupants = occupants
+            Player = lightCompetitor
+            Opponent = darkCompetitor }
+        |> fun board -> execute board millFormingAction
+        |> fun board -> execute board shotAction
+
+    Assert.Equal((Light, Won), (board.Player.Shade, board.Status))

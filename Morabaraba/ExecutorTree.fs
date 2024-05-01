@@ -6,7 +6,19 @@ open ExecutorCollection
 let shootExecution =
     BinaryTree.Node(
         shoot,
-        BinaryTree.Node(saveAction, BinaryTree.Node(switchTurns, BinaryTree.Empty, BinaryTree.Empty), BinaryTree.Empty),
+        BinaryTree.Node(
+            saveAction,
+            BinaryTree.Node(
+                checkPlacingHand,
+                BinaryTree.Node(switchTurns, BinaryTree.Empty, BinaryTree.Empty),
+                BinaryTree.Node(
+                    winIfOpponentHasTwoCowsLeft,
+                    BinaryTree.Empty,
+                    BinaryTree.Node(switchTurns, BinaryTree.Empty, BinaryTree.Empty)
+                )
+            ),
+            BinaryTree.Empty
+        ),
         BinaryTree.Empty
     )
 

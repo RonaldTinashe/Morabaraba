@@ -171,3 +171,12 @@ let winIfNoMovesForOpponent board _ =
         Some { board with Status = Won }
     else
         None
+
+let winIfOpponentHasTwoCowsLeft board _ =
+    let opponentJunctions =
+        occupantsByShade board.Opponent.Shade board.Occupants |> Map.keys |> List.ofSeq
+
+    if List.length opponentJunctions = 2 then
+        Some { board with Status = Won }
+    else
+        None
