@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
@@ -12,6 +12,5 @@
     <Compile Include="ExecutorTree.fs" />
     <Compile Include="ExecutionService.fsi" />
     <Compile Include="ExecutionService.fs" />
-    <Compile Include="Program.fs" />
   </ItemGroup>
 </Project>

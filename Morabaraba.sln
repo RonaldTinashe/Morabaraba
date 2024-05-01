@@ -7,6 +7,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Morabaraba", "Morabaraba\Mo
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Morabaraba.Tests", "Morabaraba.Tests\Morabaraba.Tests.fsproj", "{64C44995-6824-4806-AF26-7F9FD23DCBC3}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Morabaraba.Console", "Morabaraba.Console\Morabaraba.Console.fsproj", "{C403FE1C-3C7E-468C-8071-A4296BF64967}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{64C44995-6824-4806-AF26-7F9FD23DCBC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64C44995-6824-4806-AF26-7F9FD23DCBC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64C44995-6824-4806-AF26-7F9FD23DCBC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C403FE1C-3C7E-468C-8071-A4296BF64967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C403FE1C-3C7E-468C-8071-A4296BF64967}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C403FE1C-3C7E-468C-8071-A4296BF64967}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C403FE1C-3C7E-468C-8071-A4296BF64967}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

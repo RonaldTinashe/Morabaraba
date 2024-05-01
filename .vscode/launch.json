@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Morabaraba/bin/Debug/net8.0/Morabaraba.dll",
+            "program": "${workspaceFolder}/Morabaraba.Console/bin/Debug/net8.0/Morabaraba.Console.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
