@@ -2,14 +2,14 @@ module Morabaraba.OccupationService
 
 let createJunction (letter: char) (number: int) = Junction $"{letter}{number}"
 let boardNumbers = [ 1..8 ]
+let boardLetters = [ 'E'; 'A'; 'R' ]
 
 let lines =
     let flip a b c = a c b
 
     let sameLetterLines =
         let numbersLines = [ [ 1; 2; 3 ]; [ 7; 6; 5 ]; [ 1; 8; 7 ]; [ 3; 4; 5 ] ]
-        let letters = [ 'E'; 'A'; 'R' ]
-        List.collect (fun l -> List.map (fun nl -> List.map (createJunction l) nl) numbersLines) letters
+        List.collect (fun l -> List.map (fun nl -> List.map (createJunction l) nl) numbersLines) boardLetters
 
     let sameNumberLines =
         boardNumbers

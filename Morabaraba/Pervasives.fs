@@ -5,7 +5,7 @@ type Shade =
     | Dark
     | Light
 
-type Junction = private Junction of string
+type Junction = Junction of string
 
 let Junction coordinates =
     let letters = [ 'A'; 'E'; 'R' ]
