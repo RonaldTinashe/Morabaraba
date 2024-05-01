@@ -180,3 +180,23 @@ let winIfOpponentHasTwoCowsLeft board _ =
         Some { board with Status = Won }
     else
         None
+
+let drawIfNoShotsInTenMoves board _ =
+    let hasAtLeastTenMoves = List.length board.History >= 10
+
+    let playerCowCount =
+        occupantsByShade board.Player.Shade board.Occupants |> Map.count
+
+    let isPlayerFlying = board.Player.Hand = 0 && 3 = playerCowCount
+
+    let lastMovesHaveASource history =
+        List.map (_.Source) history |> List.exists Option.isSome
+
+    if
+        hasAtLeastTenMoves
+        && isPlayerFlying
+        && lastMovesHaveASource board.History.[0..9]
+    then
+        Some { board with Status = Drew }
+    else
+        None

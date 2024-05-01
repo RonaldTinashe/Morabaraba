@@ -447,3 +447,50 @@ let ``Player wins if the opponent has two cows left`` () =
         |> fun board -> execute board shotAction
 
     Assert.Equal((Light, Won), (board.Player.Shade, board.Status))
+
+[<Fact>]
+let ``Draw when there is no shot in the last ten moves and the player has three cows left`` () =
+    let darkMovement1 =
+        { Source = Some(Junction "A1")
+          Destination = Junction "A2" }
+
+    let lightMovement1 =
+        { Source = Some(Junction "R1")
+          Destination = Junction "R2" }
+
+    let darkMovement2 =
+        { Source = Some(Junction "A2")
+          Destination = Junction "A1" }
+
+    let lightMovement2 =
+        { Source = Some(Junction "R2")
+          Destination = Junction "R1" }
+
+    let history =
+        [ darkMovement1
+          lightMovement1
+          darkMovement2
+          lightMovement2
+          darkMovement1
+          lightMovement1
+          darkMovement2
+          lightMovement2
+          darkMovement1
+          lightMovement1
+          darkMovement2
+          lightMovement2 ]
+
+    let occupants = massOccupy [ "A7"; "A6" ] [ "E7"; "E6" ]
+    let player = { Shade = Dark; Hand = 0 }
+    let opponent = { player with Shade = Light }
+    let action = darkMovement2
+
+    let board =
+        { Occupants = occupants
+          Player = player
+          Opponent = opponent
+          History = history
+          Status = Playing }
+
+    let board = execute board action
+    Assert.Equal(Drew, board.Status)

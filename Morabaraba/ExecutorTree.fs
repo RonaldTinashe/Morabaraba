@@ -37,7 +37,11 @@ let checkMillOrSwitch =
     BinaryTree.Node(
         checkPlayerMillIsNew,
         BinaryTree.Empty,
-        BinaryTree.Node(switchTurns, BinaryTree.Empty, BinaryTree.Empty)
+        BinaryTree.Node(
+            drawIfNoShotsInTenMoves,
+            BinaryTree.Empty,
+            BinaryTree.Node(switchTurns, BinaryTree.Empty, BinaryTree.Empty)
+        )
     )
 
 let place' =
